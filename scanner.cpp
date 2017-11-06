@@ -5,6 +5,8 @@
 #include <iostream>
 #include <map>
 #include "./token.h"
+#include "./scanner.h"
+
 
 using namespace std;
 const int STRING_ARRAY_SIZE=10;
@@ -13,6 +15,7 @@ const int TABLE_COLUMNS=24;
 const int TOKENS_TO_STRING_ARRAY_SIZE=36;
 int Character_Counter=0;
 int Number_Line_Counter=1;
+string the_file_string=""; //intializes the_file_string.
 const char Get_Char(const string &, int );
 
 
@@ -225,7 +228,7 @@ TOKEN_ID Token_Id_A_Keyword(const string & the_value_string)
 }
 
 //This gets called by the test scanner program.
-Token  Driver (const string &the_file_string)
+Token scanner ()
 {
     STATE state=INITIAL;
     TOKEN_ID token_id;
@@ -259,8 +262,8 @@ Token  Driver (const string &the_file_string)
 
            //Makes the token and then prints results and returns the toke to the test scanner which will be the parser.
            Token *my_token=new Token(token_id,value_string, Number_Line_Counter);
-           cout <<"Token : "<<TOKEN_IDS_TO_STRING_ARRAY[(*my_token).Get_Token_ID()]<< " ~~~ String value : \""
-                <<(*my_token).Get_The_String()<<"\" ~~~ The Line Number is : "<<(*my_token).Get_Line_Number()<<endl;
+           //cout <<"Token : "<<TOKEN_IDS_TO_STRING_ARRAY[(*my_token).Get_Token_ID()]<< " ~~~ String value : \""
+           //     <<(*my_token).Get_The_String()<<"\" ~~~ The Line Number is : "<<(*my_token).Get_Line_Number()<<endl;
            return *my_token;
        }
        else

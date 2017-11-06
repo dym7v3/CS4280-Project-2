@@ -11,6 +11,8 @@
 #include "./filterFunction.h"
 #include "./FileInputFunction.h"
 #include "./testscanner.h"
+#include "scanner.h"
+#include "parser.h"
 
 using namespace std;
 
@@ -45,7 +47,10 @@ int main ( int argc, char *argv[] )
     string_from_file=Remove_Comments(string_from_file);
 
     //Calls the parser(Test_scanner) function which will continue to call the driver until the end of file is reached.
-    Test_Scanner(string_from_file);
+    the_file_string=string_from_file;
+
+    parser();
+    //Test_Scanner();
 
     return 0;
 }

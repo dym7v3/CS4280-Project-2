@@ -7,7 +7,7 @@
 
 using namespace std;
 
-const void Test_Scanner(const string &File_String)
+const void Test_Scanner()
 {
     bool not_reached_end_of_file= true;
 
@@ -15,7 +15,7 @@ const void Test_Scanner(const string &File_String)
     do
     {
 
-        Token the_token = Driver(File_String);
+        Token the_token = scanner();
 
         //This checks if the last token that was returned was the end of the file.
         if(the_token.Get_Token_ID()== End_Of_File)
