@@ -6,7 +6,7 @@
 
 using namespace std;
 
-static const string ERROR="PARSING ERORR: ";
+static const string ERROR="PARSING ERROR: ";
 static Token tk;
 
 /*
@@ -113,7 +113,8 @@ void RO()
     }
     else
     {
-        cout<<ERROR<<
+        cout<<ERROR<<"The token that was received  was : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to get < or <= or > or >+ or == or !=."
+        exit(1);
     }
 }
 
