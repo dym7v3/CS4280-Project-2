@@ -13,5 +13,5 @@ Token scanner();
 extern int Character_Counter;
 extern int Number_Line_Counter;
 extern string the_file_string;
-
+extern string TOKEN_IDS_TO_STRING_ARRAY [];
 #endif //P1_SCANNER_H
