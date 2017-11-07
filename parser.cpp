@@ -443,8 +443,17 @@ void MVARS()
     else if(tk.Get_Token_ID()==Delimiter_Comma)
     {
         tk=scanner(); //consumes the Comma delimiter.
-        MVARS();
-        return;
+        if(tk.Get_Token_ID()==Identifiers)
+        {
+            tk=scanner(); // Consumes the Identifier.
+            MVARS();
+            return;
+        }
+        else
+        {
+            error(Identifiers,tk);
+        }
+
     }
     else
     {
