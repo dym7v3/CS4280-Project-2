@@ -10,23 +10,23 @@ static const string ERROR="PARSING ERROR: ";
 static Token tk;
 
 /*
-<PROGRAM>  ->  <VARS> <BLOCK>
-<BLOCK>    ->  Begin <VARS> <STATS> End
-<VARS>     ->  empty | Var Identifier <MVARS>
-<MVARS>    ->  .  | , Identifier <MVARS>
-<EXPR>     ->  <M> + <EXPR> | <M> - <EXPR> | <M>
-<M>        ->  <F> % <M> | <F> * <M> | <F>
-<F>        ->  ( <F> ) | <R>
-<R>        ->  [ <EXPR> ] | Identifier | Number
-<STATS>    ->  <STAT>  <MSTAT>
-<MSTAT>    ->  empty |  <STAT>  <MSTAT>
-<STAT>     ->  <IN> | <OUT> | <BLOCK> | <IFF> | <LOOP> | <ASSIGN>
-<IN>       ->  Input Identifier ;
-<OUT>      ->  Output <EXPR>  ;
-<IFF>       ->  Check [ <EXPR> <RO> <EXPR> ] <STAT>
-<LOOP>     ->  Loop [ <EXPR> <RO> <EXPR> ] <STAT>
-<ASSIGN>   ->  Identifier : <EXPR>   ;
-<RO>       ->  < | <= | >  | >= | ==  |  !=
+<PROGRAM> ->  <VARS> <BLOCK>
+<BLOCK>  ->  Begin <VARS> <STATS> End
+<VARS>   ->  empty | Var Identifier <MVARS>
+<MVARS>  ->  .  | , Identifier <MVARS>
+<EXPR>   ->  <M> + <EXPR> | <M> - <EXPR> | <M> //
+<M>      ->  <F> % <M> | <F> * <M> | <F>
+<F>      ->  ( <F> ) | <R>
+<R>      ->  [ <EXPR> ] | Identifier | Number
+<STATS>  ->  <STAT>  <MSTAT>
+<MSTAT>  ->  empty |  <STAT>  <MSTAT>
+<STAT>   ->  <IN> | <OUT> | <BLOCK> | <IFF> | <LOOP> | <ASSIGN>
+<IN>     ->  Input Identifier ;
+<OUT>    ->  Output <EXPR>  ;
+<IFF>    ->  Check [ <EXPR> <RO> <EXPR> ] <STAT>
+<LOOP>   ->  Loop [ <EXPR> <RO> <EXPR> ] <STAT>
+<ASSIGN> ->  Identifier : <EXPR>   ;
+<RO>     ->  < | <= | >  | >= | ==  |  !=
 
 /accounts/classes/janikowc/cs4280
 
@@ -59,6 +59,7 @@ void VARS();
 void MVARS();
 void EXPR();
 void M();
+void F();
 void R();
 void STATS();
 void MSTAT();
@@ -69,13 +70,210 @@ void IFF();
 void LOOP();
 void ASSIGN();
 void RO();
-void error();
+void error(TOKEN_ID, Token);
 
 void error(TOKEN_ID expected , Token got)
 {
     cout<<"PARSING ERROR: The Expected Token was : "<<TOKEN_IDS_TO_STRING_ARRAY[expected]<<" but got : "<<TOKEN_IDS_TO_STRING_ARRAY[got.Get_Token_ID()]<<endl;
     cout<<"The parsing was terminated. "<<endl;
     exit(1);
+}
+
+//<M> ->  <F> % <M> | <F> * <M> | <F>
+void M()
+{
+    F();
+    if(tk.Get_Token_ID()==Operator_Modulo)
+    {
+        tk=scanner();
+        M();
+        return;
+    }
+    else if(tk.Get_Token_ID()==Operator_Multiply)
+    {
+        tk=scanner();
+        M();
+        return;
+    }
+    else
+        return;
+}
+
+
+//<F> ->  ( <F> ) | <R>
+void F()
+{
+    if(tk.Get_Token_ID()==Delimiter_Left_Parenthesis)
+    {
+        tk=scanner(); //Consumes the (
+        F();
+        if(tk.Get_Token_ID()==Delimiter_Right_Parenthesis)
+        {
+            tk=scanner(); //Consumes the )
+            return;
+        } else
+        {
+            error(Delimiter_Right_Parenthesis,tk);
+        }
+    }
+    else
+    {
+        R();
+        return;
+    }
+}
+
+//<IN> ->  Input Identifier ;
+void IN()
+{
+    if(tk.Get_Token_ID()==Keyword_Input)
+    {
+        tk=scanner();
+        if(tk.Get_Token_ID()==Identifiers)
+        {
+            tk=scanner();
+            if(tk.Get_Token_ID()==Delimiter_Semi_Colon)
+            {
+                tk=scanner();
+                return;
+            }
+            else
+            {
+                error(Delimiter_Semi_Colon,tk);
+            }
+        }
+        else
+        {
+            error(Identifiers,tk);
+        }
+    }
+    else
+    {
+        error(Keyword_Input,tk);
+    }
+}
+
+
+//<EXPR>   ->  <M> + <EXPR> | <M> - <EXPR> | <M>
+void EXPR()
+{
+    M();
+    if(tk.Get_Token_ID()==Operator_Plus)
+    {
+        tk=scanner();
+        EXPR();
+        return;
+    }
+    else if(tk.Get_Token_ID()==Operator_Minus)
+    {
+        tk=scanner();
+        EXPR();
+        return;
+    }
+    else
+    {
+       return;
+    }
+}
+//<STAT> ->  <IN> | <OUT> | <BLOCK> | <IFF> | <LOOP> | <ASSIGN>
+void STAT()
+{
+    if(tk.Get_Token_ID()==Keyword_Input)
+    {
+        IN();
+        return;
+    }
+    else if(tk.Get_Token_ID()==Keyword_Output)
+    {
+        OUT();
+        return;
+    }
+    else if(tk.Get_Token_ID()==Keyword_Begin)
+    {
+        BLOCK();
+        return;
+    }
+    else if(tk.Get_Token_ID()==Keyword_Check)
+    {
+        IFF();
+        return;
+    }
+    else if (tk.Get_Token_ID()==Keyword_Loop)
+    {
+        LOOP();
+        return;
+    }
+    else if(tk.Get_Token_ID()==Identifiers)
+    {
+        ASSIGN();
+        return;
+    }
+    else
+    {
+        cout<<ERROR<<"Expected to get token to be loop, check, begin, ouput, input or Identifier but got : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<endl;
+    }
+}
+
+//<IFF> /->  Check [ <EXPR> <RO> <EXPR> ] <STAT>
+void IFF()
+{
+    //This starts the check and then goes to Left Bracket and then EXPR and Then RO and Then EXPR and then Right Bracket and Then STAT.
+    //There is only one way that the tokens can go.
+    if(tk.Get_Token_ID()==Keyword_Check)
+    {
+        tk=scanner(); //Consumes the Check Keyword
+        if(tk.Get_Token_ID()==Delimiter_Left_Bracket)
+        {
+            tk=scanner(); //Consumes the Left Bracket token.
+            EXPR();
+            RO();
+            EXPR();
+            if(tk.Get_Token_ID()==Delimiter_Right_Bracket)
+            {
+                tk=scanner(); //Consumes the Right Bracket token.
+                STAT();
+                return;
+            }
+            else {
+                error(Delimiter_Right_Bracket,tk);
+            }
+        }
+        else {
+            error(Delimiter_Left_Bracket,tk);
+        }
+    }
+    else{
+        error(Keyword_Check, tk);
+    }
+}
+
+//<LOOP>   ->  Loop [ <EXPR> <RO> <EXPR> ] <STAT>
+void LOOP()
+{
+    //Only allows only the loop keyword then Left bracket and EXPR then RO and EXPR and Right Bracket and STAT
+    if(tk.Get_Token_ID()==Keyword_Loop)
+    {
+        tk=scanner(); // Consumes the Keyword Loop token
+        if(tk.Get_Token_ID()==Delimiter_Left_Bracket)
+        {
+            tk=scanner(); //Consumes the Left Bracket token.
+            EXPR();
+            RO();
+            EXPR();
+            if(tk.Get_Token_ID()==Delimiter_Right_Bracket)
+            {
+                tk=scanner(); //Consumes the Right Bracket token.
+                STAT();
+                return;
+            } else{
+                error(Delimiter_Right_Bracket,tk);
+            }
+        } else{
+            error(Delimiter_Left_Bracket, tk);
+        }
+    } else{
+        error(Keyword_Loop, tk);
+    }
 }
 
 //<RO> ->  < | <= | >  | >= | ==  |  !=
@@ -113,7 +311,7 @@ void RO()
     }
     else
     {
-        cout<<ERROR<<"The token that was received  was : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to get < or <= or > or >+ or == or !=."
+        cout<<ERROR<<"The token that was received  was : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to get < or <= or > or >+ or == or !=."<<endl;
         exit(1);
     }
 }
@@ -168,7 +366,6 @@ void OUT()
     }
     else
     {
-
         error(Keyword_Output,tk);
     }
 }
@@ -212,7 +409,15 @@ void R()
 //<MSTAT> ->  empty |  <STAT>  <MSTAT>
 void MSTAT()
 {
-
+    if(tk.Get_Token_ID()==Keyword_Input || tk.Get_Token_ID()==Keyword_Output || tk.Get_Token_ID()==Keyword_Begin || tk.Get_Token_ID()==Keyword_Check || tk.Get_Token_ID()==Keyword_Loop || tk.Get_Token_ID()==Identifiers) {
+        STAT();
+        MSTAT();
+        return;
+    }
+    else
+    {
+       return;
+    }
 }
 
 //<STATS> ->  <STAT>  <MSTAT>
@@ -256,8 +461,16 @@ void VARS()
     if(tk.Get_Token_ID()==Keyword_Var)
     {
         tk=scanner(); //consumes the keyword Var
-        MVARS(); //calls mvars() right after Keyword Var.
-        return;
+        if(tk.Get_Token_ID()==Identifiers)
+        {
+            tk=scanner(); //consumes the Identifiers.
+            MVARS(); //calls mvars() right after Keyword Var.
+            return;
+        }
+        else
+        {
+            error(Identifiers,tk);
+        }
     }
     else //This will be for the empty string.
         return;

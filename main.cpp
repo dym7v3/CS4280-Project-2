@@ -50,7 +50,6 @@ int main ( int argc, char *argv[] )
     the_file_string=string_from_file;
 
     parser();
-    //Test_Scanner();
 
     return 0;
 }

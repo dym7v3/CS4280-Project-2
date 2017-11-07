@@ -1,1 +1,4 @@
+Var x , y .
 Begin
+  Output 1 ;
+End
