@@ -30,20 +30,24 @@ class Node
 private:
 
 
-    NODE_ID label;
-    TOKEN_ID token;
-    Node child1;
-    Node child2;
-    Node child3;
-    Node child4;
+    NODE_ID Label;
+    Token token;
+    Node Child1;
+    Node Child2;
+    Node Child3;
+    Node Child4;
 public:
     Node(); //Default constructor
 
     //Constructor for the class.
-    Node(NODE_ID, TOKEN_ID);
+    Node(NODE_ID);
 
+    void setChild1(Node);
+    void setChild2(Node);
+    void setChild3(Node);
+    void setChild4(Node);
+    void setToken(Token);
+    Token getToken();
 };
-
-
 
 #endif //PROJECT_2_NODE_H

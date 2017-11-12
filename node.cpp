@@ -5,17 +5,42 @@
 #include "node.h"
 
 using namespace std;
-
-
-//This is the constructor. It will take in the a TOKEn_ID, a string value and line number.
+//Default constructor.
 Node::Node()
 {
 }
-Node::Node(NODE_ID Label_ID, TOKEN_ID Token_ID)
+
+Node::Node(NODE_ID Label_ID)
 {
-    label=Label_ID;
-    token=Token_ID;
+    Label=Label_ID;
 }
 
-void Node:: setChild1()
+void Node::setChild1(Node child)
+{
+    Child1=child;
+}
+
+void Node::setChild2(Node child)
+{
+    Child2=child;
+}
+void Node::setChild3(Node child)
+{
+    Child3=child;
+}
+
+void Node::setChild4(Node child)
+{
+    Child4=child;
+}
+
+void Node::setToken(Token the_token) {
+    token=the_token;
+}
+
+Token Node::getToken()
+{
+    return token;
+}
+
 
