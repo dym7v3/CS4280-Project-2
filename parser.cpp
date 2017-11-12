@@ -2,14 +2,13 @@
 #include <iostream>
 #include "./token.h"
 #include "scanner.h"
-#include <string>
 
 using namespace std;
 
 static const string ERROR="PARSING ERROR: ";
 static Token tk;
 
-/*
+/* Var x1 , x2 ;
 <PROGRAM> ->  <VARS> <BLOCK>
 <BLOCK>  ->  Begin <VARS> <STATS> End
 <VARS>   ->  empty | Var Identifier <MVARS>
@@ -74,7 +73,7 @@ void error(TOKEN_ID, Token);
 
 void error(TOKEN_ID expected , Token got)
 {
-    cout<<"PARSING ERROR: The Expected Token was : "<<TOKEN_IDS_TO_STRING_ARRAY[expected]<<" but got : "<<TOKEN_IDS_TO_STRING_ARRAY[got.Get_Token_ID()]<<endl;
+    cout<<"PARSING ERROR: The Expected Token was : "<<TOKEN_IDS_TO_STRING_ARRAY[expected]<<" but got : "<<TOKEN_IDS_TO_STRING_ARRAY[got.Get_Token_ID()]<<" on line number : "<<got.Get_Line_Number()<<endl;
     cout<<"The parsing was terminated. "<<endl;
     exit(1);
 }
@@ -128,7 +127,7 @@ void IN()
 {
     if(tk.Get_Token_ID()==Keyword_Input)
     {
-        tk=scanner();
+        tk=scanner(); //Consumes the input keyword
         if(tk.Get_Token_ID()==Identifiers)
         {
             tk=scanner();
@@ -210,7 +209,7 @@ void STAT()
     }
     else
     {
-        cout<<ERROR<<"Expected to get token to be loop, check, begin, ouput, input or Identifier but got : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<endl;
+        cout<<ERROR<<"Expected to get token to be loop, check, begin, ouput, input or Identifier but got : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" on line number : "<<tk.Get_Line_Number()<<endl;
     }
 }
 
@@ -311,7 +310,7 @@ void RO()
     }
     else
     {
-        cout<<ERROR<<"The token that was received  was : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to get < or <= or > or >+ or == or !=."<<endl;
+        cout<<ERROR<<"The token that was received  was : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to get < or <= or > or >+ or == or != on line number : "<<tk.Get_Line_Number()<<endl;
         exit(1);
     }
 }
@@ -400,7 +399,7 @@ void R()
     }
     else
     {
-        cout<<ERROR<<"Expect to get a Left Bracket or Identifier or Number but got : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<endl;
+        cout<<ERROR<<"Expect to get a Left Bracket or Identifier or Number but got : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" on line number : "<<tk.Get_Line_Number()<<endl;
         exit(1);
     }
 }
@@ -457,7 +456,7 @@ void MVARS()
     }
     else
     {
-        cout<<ERROR<<"The parser got a : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to have a period or comma delimiter."<<endl;
+        cout<<ERROR<<"The parser got a : "<<TOKEN_IDS_TO_STRING_ARRAY[tk.Get_Token_ID()]<<" but expected to have a period or comma delimiter."<<" on line number : "<<tk.Get_Line_Number()<<endl;
         exit(1);
     }
 }

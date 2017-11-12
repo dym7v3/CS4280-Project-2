@@ -10,7 +10,6 @@
 #include <iostream>
 #include "./filterFunction.h"
 #include "./FileInputFunction.h"
-#include "./testscanner.h"
 #include "scanner.h"
 #include "parser.h"
 
