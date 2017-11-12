@@ -2,6 +2,7 @@
 #include <iostream>
 #include "./token.h"
 #include "scanner.h"
+#include "node.h"
 
 using namespace std;
 
@@ -518,8 +519,10 @@ void PROGRAM()
     return;
 }
 
-void parser()
+Node parser()
 {
+
+    Node root; //Made the node which will be the root.
     tk=scanner(); //Grabs the first from the scanner.
     PROGRAM(); //Runs program because it is the first production. It is obviously a none terminal.
 
@@ -532,6 +535,6 @@ void parser()
     { //Else it will display an error and terminate the program.
         error(End_Of_File,tk);
     }
-    return; //This returns nothing. But later will be changed for the parse tree. It will return the whole parse tree.
+    return root; //This returns nothing. But later will be changed for the parse tree. It will return the whole parse tree.
 }
 
