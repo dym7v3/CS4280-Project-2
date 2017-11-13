@@ -6,10 +6,9 @@
 #include <fstream>
 
 using namespace std;
-const int NODE_IDS_SIZE=19;
+const int NODE_IDS_SIZE=18;
 
 string NodeIds[NODE_IDS_SIZE]={
-        "PARSER_Node",
         "PROGRAM_Node",
         "BLOCK_Node",
         "VARS_Node",
@@ -51,10 +50,10 @@ void printParseTree(Node rootP, int level, ostream& output)      /* for debuggin
                 output<<"\t";
             }
             level=level/2;
-            cout<<level<<" : NODE : "<<NodeIds[rootP.getNODE_ID()];
-            output<<level<<" : NODE : "<<NodeIds[rootP.getNODE_ID()];
-            cout << " : TOKEN = " << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << " ON LINE NUMBER : " << rootP.getTokenLineNumber()<< " WITH STRING VALUE : " << rootP.getTokenString()<< endl;
-            output<< " : TOKEN = " << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << " ON LINE NUMBER : " << rootP.getTokenLineNumber()<< " WITH STRING VALUE : "<< rootP.getTokenString()<< endl;
+            cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
+            output<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
+            cout << " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE : < " << rootP.getTokenString()<<" >"<<endl;
+            output<< " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE < "<< rootP.getTokenString()<<" >"<< endl;
         }
         else
         {
@@ -65,8 +64,8 @@ void printParseTree(Node rootP, int level, ostream& output)      /* for debuggin
                 output<<"\t";
             }
             level=level/2;
-            cout<<level<<" : NODE : "<<NodeIds[rootP.getNODE_ID()]<<endl;
-            output<<level<<" : NODE : "<<NodeIds[rootP.getNODE_ID()]<<endl;
+            cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()]<<endl;
+            output<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()]<<endl;
         }
     }
 

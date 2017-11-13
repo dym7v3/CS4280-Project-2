@@ -5,7 +5,6 @@
 #include "token.h"
 #include <vector>
 enum NODE_ID {
-    ROOT_Node,
     PROGRAM_Node,
     BLOCK_Node,
     VARS_Node,

@@ -9,27 +9,8 @@ using namespace std;
 static const string ERROR="PARSING ERROR: ";
 static Token tk;
 
-/* Var x1 , x2 ;
-<PROGRAM> ->  <VARS> <BLOCK>
-<BLOCK>  ->  Begin <VARS> <STATS> End
-<VARS>   ->  empty | Var Identifier <MVARS>
-<MVARS>  ->  .  | , Identifier <MVARS>
-<EXPR>   ->  <M> + <EXPR> | <M> - <EXPR> | <M> //
-<M>      ->  <F> % <M> | <F> * <M> | <F>
-<F>      ->  ( <F> ) | <R>
-<R>      ->  [ <EXPR> ] | Identifier | Number
-<STATS>  ->  <STAT>  <MSTAT>
-<MSTAT>  ->  empty |  <STAT>  <MSTAT>
-<STAT>   ->  <IN> | <OUT> | <BLOCK> | <IFF> | <LOOP> | <ASSIGN>
-<IN>     ->  Input Identifier ;
-<OUT>    ->  Output <EXPR>  ;
-<IFF>    ->  Check [ <EXPR> <RO> <EXPR> ] <STAT>
-<LOOP>   ->  Loop [ <EXPR> <RO> <EXPR> ] <STAT>
-<ASSIGN> ->  Identifier : <EXPR>   ;
-<RO>     ->  < | <= | >  | >= | ==  |  !=
-
+/*
 /accounts/classes/janikowc/cs4280
-
 when you build a parse tree the tokens that you need to store are id, operators, numbers. Don't have to store the other ones.
 Each node will have 4 children. input identifier won't have to store.
 One node has one token.
@@ -45,9 +26,7 @@ main{
  preorder print(p);
  ...
  }
-
  This is why the print tree should be in a separate file. Because later on it will be removed.
-
  */
 
 
@@ -449,7 +428,7 @@ Node MSTAT()
 //<STATS> ->  <STAT>  <MSTAT>
 Node STATS()
 {
-    Node t(STAT_Node);
+    Node t(STATS_Node);
     //This non-terminal function will only have two options.
     t.setChild1(STAT());
     t.setChild2(MSTAT());
