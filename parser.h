@@ -6,6 +6,6 @@
 
 #ifndef PROJECT_2_PARSER_H
 #define PROJECT_2_PARSER_H
-Node parser();
+Node * parser();
 
 #endif //PROJECT_2_PARSER_H

@@ -12,6 +12,9 @@
 #include "./FileInputFunction.h"
 #include "scanner.h"
 #include "parser.h"
+#include "testparser.h"
+#include <fstream>
+
 
 using namespace std;
 
@@ -48,8 +51,15 @@ int main ( int argc, char *argv[] )
     //Calls the parser(Test_scanner) function which will continue to call the driver until the end of file is reached.
     the_file_string=string_from_file;
 
-    parser();
+    string preorder_name="output.preorder.txt";
+    ofstream preorder(preorder_name.c_str());
+
+    Node *p=parser();
+    printParseTree(*p, 0,preorder);
+
 
     return 0;
 }
+
+
 

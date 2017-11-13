@@ -53,23 +53,23 @@ main{
 
 
 //prototypes for all the functions.
-void PROGRAM();
-void BLOCK();
-void VARS();
-void MVARS();
-void EXPR();
-void M();
-void F();
-void R();
-void STATS();
-void MSTAT();
-void STAT();
-void IN();
-void OUT();
-void IFF();
-void LOOP();
-void ASSIGN();
-void RO();
+Node *PROGRAM();
+Node BLOCK();
+Node VARS();
+Node MVARS();
+Node EXPR();
+Node M();
+Node F();
+Node R();
+Node STATS();
+Node MSTAT();
+Node STAT();
+Node IN();
+Node OUT();
+Node IFF();
+Node LOOP();
+Node ASSIGN();
+Node RO();
 void error(TOKEN_ID, Token);
 
 void error(TOKEN_ID expected , Token got)
@@ -80,37 +80,41 @@ void error(TOKEN_ID expected , Token got)
 }
 
 //<M> ->  <F> % <M> | <F> * <M> | <F>
-void M()
+Node M()
 {
-    F();
+    Node t(M_Node);
+    t.setChild1(F());
     if(tk.Get_Token_ID()==Operator_Modulo)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner();
-        M();
-        return;
+        t.setChild2(M());
+        return t;
     }
     else if(tk.Get_Token_ID()==Operator_Multiply)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner();
-        M();
-        return;
+        t.setChild2(M());
+        return t;
     }
     else
-        return;
+        return t;
 }
 
 
 //<F> ->  ( <F> ) | <R>
-void F()
+Node F()
 {
+    Node t(F_Node);
     if(tk.Get_Token_ID()==Delimiter_Left_Parenthesis)
     {
         tk=scanner(); //Consumes the (
-        F();
+        t.setChild1(F());
         if(tk.Get_Token_ID()==Delimiter_Right_Parenthesis)
         {
             tk=scanner(); //Consumes the )
-            return;
+            return t;
         } else
         {
             error(Delimiter_Right_Parenthesis,tk);
@@ -118,24 +122,26 @@ void F()
     }
     else
     {
-        R();
-        return;
+        t.setChild1(R());
+        return t;
     }
 }
 
 //<IN> ->  Input Identifier ;
-void IN()
+Node IN()
 {
     if(tk.Get_Token_ID()==Keyword_Input)
     {
         tk=scanner(); //Consumes the input keyword
         if(tk.Get_Token_ID()==Identifiers)
         {
+            Node t(IN_Node);
+            t.setToken(tk); //First save the token then consume it.
             tk=scanner();
             if(tk.Get_Token_ID()==Delimiter_Semi_Colon)
             {
                 tk=scanner();
-                return;
+                return t;
             }
             else
             {
@@ -155,58 +161,62 @@ void IN()
 
 
 //<EXPR>   ->  <M> + <EXPR> | <M> - <EXPR> | <M>
-void EXPR()
+Node EXPR()
 {
-    M();
+    Node t(EXPR_Node);
+    t.setChild1(M());
     if(tk.Get_Token_ID()==Operator_Plus)
     {
-        tk=scanner();
-        EXPR();
-        return;
+        t.setToken(tk); //First save the token then consume it.
+        tk=scanner(); //Consumes the plus.
+        t.setChild2(EXPR());
+        return t;
     }
     else if(tk.Get_Token_ID()==Operator_Minus)
     {
-        tk=scanner();
-        EXPR();
-        return;
+        t.setToken(tk); //First save the token then consume it.
+        tk=scanner(); //Consumes the Minus.
+        t.setChild2(EXPR());
+        return t;
     }
     else
     {
-       return;
+       return t;
     }
 }
 //<STAT> ->  <IN> | <OUT> | <BLOCK> | <IFF> | <LOOP> | <ASSIGN>
-void STAT()
+Node STAT()
 {
+    Node t(STAT_Node);
     if(tk.Get_Token_ID()==Keyword_Input)
     {
-        IN();
-        return;
+        t.setChild1(IN());
+        return t;
     }
     else if(tk.Get_Token_ID()==Keyword_Output)
     {
-        OUT();
-        return;
+        t.setChild1(OUT());
+        return t;
     }
     else if(tk.Get_Token_ID()==Keyword_Begin)
     {
-        BLOCK();
-        return;
+        t.setChild1(BLOCK());
+        return t;
     }
     else if(tk.Get_Token_ID()==Keyword_Check)
     {
-        IFF();
-        return;
+        t.setChild1(IFF());
+        return t;
     }
     else if (tk.Get_Token_ID()==Keyword_Loop)
     {
-        LOOP();
-        return;
+        t.setChild1(LOOP());
+        return t;
     }
     else if(tk.Get_Token_ID()==Identifiers)
     {
-        ASSIGN();
-        return;
+        t.setChild1(ASSIGN());
+        return t;
     }
     else
     {
@@ -215,7 +225,7 @@ void STAT()
 }
 
 //<IFF> /->  Check [ <EXPR> <RO> <EXPR> ] <STAT>
-void IFF()
+Node IFF()
 {
     //This starts the check and then goes to Left Bracket and then EXPR and Then RO and Then EXPR and then Right Bracket and Then STAT.
     //There is only one way that the tokens can go.
@@ -224,15 +234,16 @@ void IFF()
         tk=scanner(); //Consumes the Check Keyword
         if(tk.Get_Token_ID()==Delimiter_Left_Bracket)
         {
+            Node t(IFF_Node);
             tk=scanner(); //Consumes the Left Bracket token.
-            EXPR();
-            RO();
-            EXPR();
+            t.setChild1(EXPR());
+            t.setChild2(RO());
+            t.setChild3(EXPR());
             if(tk.Get_Token_ID()==Delimiter_Right_Bracket)
             {
                 tk=scanner(); //Consumes the Right Bracket token.
-                STAT();
-                return;
+                t.setChild4(STAT());
+                return t;
             }
             else {
                 error(Delimiter_Right_Bracket,tk);
@@ -248,23 +259,24 @@ void IFF()
 }
 
 //<LOOP>   ->  Loop [ <EXPR> <RO> <EXPR> ] <STAT>
-void LOOP()
+Node LOOP()
 {
     //Only allows only the loop keyword then Left bracket and EXPR then RO and EXPR and Right Bracket and STAT
     if(tk.Get_Token_ID()==Keyword_Loop)
     {
+        Node t(LOOP_Node);
         tk=scanner(); // Consumes the Keyword Loop token
         if(tk.Get_Token_ID()==Delimiter_Left_Bracket)
         {
             tk=scanner(); //Consumes the Left Bracket token.
-            EXPR();
-            RO();
-            EXPR();
+            t.setChild1(EXPR());
+            t.setChild2(RO());
+            t.setChild3(EXPR());
             if(tk.Get_Token_ID()==Delimiter_Right_Bracket)
             {
                 tk=scanner(); //Consumes the Right Bracket token.
-                STAT();
-                return;
+                t.setChild4(STAT());
+                return t;
             } else{
                 error(Delimiter_Right_Bracket,tk);
             }
@@ -277,37 +289,44 @@ void LOOP()
 }
 
 //<RO> ->  < | <= | >  | >= | ==  |  !=
-void RO()
+Node RO()
 {
+    Node t (RO_Node);
     if(tk.Get_Token_ID()==Operator_Less_Than)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner(); //Consumes the less than operator.
-        return;
+        return t;
     }
     else if(tk.Get_Token_ID()==Operator_Less_Than_Or_Equal_To)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner(); //Consumes the less than or equal to operator.
-        return;
+        return t ;
     }
     else if(tk.Get_Token_ID()==Operator_Greater_Than)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner(); //Consumes the greater than operator.
-        return;
+        return t;
     }
     else if(tk.Get_Token_ID()==Operator_Greater_Than_Or_Equal_To)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner(); // Consumes the greater than or equal to operator.
-        return;
+        return t;
     }
     else if(tk.Get_Token_ID()==Operator_Equal_To)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner(); //Consumes the equal to operator.
-        return;
+        return t;
     }
     else if(tk.Get_Token_ID()==Operator_Not_Equal_To)
     {
+        t.setToken(tk); //First save the token then consume it.
         tk=scanner(); //Consumes the not equal to operator.
-        return;
+        return t;
     }
     else
     {
@@ -317,21 +336,23 @@ void RO()
 }
 
 //<ASSIGN>   ->  Identifier : <EXPR>   ;
-void ASSIGN()
+Node ASSIGN()
 {
     //ASSIGN can only begin with an Identifier else error. Then after the Identifier we need a colon else error and After colon
     //we will call EXPR and after that ; else it will be error.
     if(tk.Get_Token_ID()==Identifiers)
     {
+        Node t(ASSIGN_Node);
+        t.setToken(tk); //Save the token before consuming it.
         tk=scanner(); //Consumes the Identifier
         if(tk.Get_Token_ID()==Delimiter_Colon)
         {
             tk=scanner(); //Consumes the Colon Identifier
-            EXPR();
+            t.setChild1(EXPR());
             if(tk.Get_Token_ID()==Delimiter_Semi_Colon)
             {
                 tk=scanner(); //Consumes the Semi-Colon Delimiter.
-                return;
+                return t;
             }
             else
             {
@@ -346,18 +367,19 @@ void ASSIGN()
     }
 }
 //<OUT> ->  Output <EXPR>  ;
-void OUT()
+Node OUT()
 {
     //There is only one production that the production can be. If not it will throw an error.
     //If the first is Output Keyword then it will call the EXPR function and then check if the token is a Semi-colon else it will throw an error.
     if(tk.Get_Token_ID()==Keyword_Output)
     {
+        Node t(OUT_Node);
         tk=scanner(); //Output Token consumed
-        EXPR();
+        t.setChild1(EXPR());
         if(tk.Get_Token_ID()==Delimiter_Semi_Colon)
         {
             tk=scanner(); //Consumes the Semi-colon.
-            return;
+            return t;
         }
         else
         {
@@ -371,17 +393,18 @@ void OUT()
 }
 
 //<R> ->  [ <EXPR> ] | Identifier | Number
-void R()
+Node R()
 {
+    Node t(R_Node);
     //Checks if the first is a open bracket.
     if(tk.Get_Token_ID()==Delimiter_Left_Bracket)
     {
         tk=scanner(); //Consuming the Left Bracket.
-        EXPR();
+        t.setChild1(EXPR());
         if(tk.Get_Token_ID()==Delimiter_Right_Bracket)
         {
             tk=scanner(); //Consumes the Right Bracket.
-            return;
+            return t;
         }
         else
         {
@@ -390,13 +413,15 @@ void R()
     }
     else if(tk.Get_Token_ID()==Integer)
     {
+        t.setToken(tk); //First save the token before it consumes it.
         tk=scanner(); //consumes the Number or Integer token.
-        return;
+        return t;
     }
     else if(tk.Get_Token_ID()==Identifiers)
     {
+        t.setToken(tk); //First store the token before consuming it.
         tk=scanner(); //consumes the Identifier token.
-        return;
+        return t;
     }
     else
     {
@@ -407,30 +432,32 @@ void R()
 
 
 //<MSTAT> ->  empty |  <STAT>  <MSTAT>
-void MSTAT()
+Node MSTAT()
 {
     if(tk.Get_Token_ID()==Keyword_Input || tk.Get_Token_ID()==Keyword_Output || tk.Get_Token_ID()==Keyword_Begin || tk.Get_Token_ID()==Keyword_Check || tk.Get_Token_ID()==Keyword_Loop || tk.Get_Token_ID()==Identifiers) {
-        STAT();
-        MSTAT();
-        return;
+        Node t(MSTAT_Node);
+        t.setChild1(STAT());
+        t.setChild2(MSTAT());
+        return t;
     }
     else
     {
-       return;
+       return Node(NULL_Node);
     }
 }
 
 //<STATS> ->  <STAT>  <MSTAT>
-void STATS()
+Node STATS()
 {
+    Node t(STAT_Node);
     //This non-terminal function will only have two options.
-    STAT();
-    MSTAT();
-    return ; //Returns when both execute in order.
+    t.setChild1(STAT());
+    t.setChild2(MSTAT());
+    return t; //Returns when both execute in order.
 }
 
 //<MVARS> ->  .  | , Identifier <MVARS>
-void MVARS()
+Node MVARS()
 {
     //When called it will check if it got the period delimiter or the comma delimiter.
     //If it got the period delimiter then it will consume the period and return.
@@ -438,16 +465,18 @@ void MVARS()
     if(tk.Get_Token_ID()==Delimiter_Period)
     {
         tk=scanner(); //consumes the period.
-        return;
+        return Node(NULL_Node);
     }
     else if(tk.Get_Token_ID()==Delimiter_Comma)
     {
+        Node t(MVARS_Node);
         tk=scanner(); //consumes the Comma delimiter.
         if(tk.Get_Token_ID()==Identifiers)
         {
+            t.setToken(tk); //First save the token then consume it.
             tk=scanner(); // Consumes the Identifier.
-            MVARS();
-            return;
+            t.setChild1(MVARS());
+            return t;
         }
         else
         {
@@ -462,19 +491,21 @@ void MVARS()
     }
 }
 
-//<vars> ->  empty | Var Identifier <MVARS>
-void VARS()
+//<VARS> ->  empty | Var Identifier <MVARS>
+Node VARS()
 {
     //if the token Id is a Keyword Var then it will consume the tk and call the mvar() function
     //it follows it automatically follows it in the BNF.
     if(tk.Get_Token_ID()==Keyword_Var)
     {
+        Node t(VARS_Node);
         tk=scanner(); //consumes the keyword Var
         if(tk.Get_Token_ID()==Identifiers)
         {
+            t.setToken(tk); //First save the token then consume it.
             tk=scanner(); //consumes the Identifiers.
-            MVARS(); //calls mvars() right after Keyword Var.
-            return;
+            t.setChild1(MVARS()); //calls mvars() right after Keyword Var.
+            return t;
         }
         else
         {
@@ -482,23 +513,25 @@ void VARS()
         }
     }
     else //This will be for the empty string.
-        return;
+        return Node(NULL_Node);
 }
 //<BLOCK> ->  Begin <VARS> <STATS> End
-void BLOCK()
+Node BLOCK()
 {
+
     //The first thing the block function checks is the keyword.
     //Once it finds that then it will call vars() and right after it will call stats. Then it will check
     //if the end keyword was found. If it was then it will return.
     if(tk.Get_Token_ID()==Keyword_Begin)
     {
+        Node t(BLOCK_Node);
         tk=scanner(); //Consumes the Begin token.
-        VARS();
-        STATS();
+        t.setChild1(VARS());
+        t.setChild2(STATS());
         if(tk.Get_Token_ID()==Keyword_End)
         {
             tk=scanner(); //Consumes the End token.
-            return;
+            return t;
         }
         else
         {
@@ -511,21 +544,21 @@ void BLOCK()
     }
 }
 //<PROGRAM>  ->  <VARS> <BLOCK>
-void PROGRAM()
+Node * PROGRAM()
 {
+    auto *t=new Node(PROGRAM_Node);
     //program function can only go to two things. The vars() and block() functions which are non-terminals.
-    VARS();
-    BLOCK();
-    return;
+    t->setChild1(VARS());
+    t->setChild2(BLOCK());
+    return t;
 }
 
-Node parser()
+Node * parser()
 {
 
-    Node root; //Made the node which will be the root.
+    Node *root; //Made the node which will be the root.
     tk=scanner(); //Grabs the first from the scanner.
-    PROGRAM(); //Runs program because it is the first production. It is obviously a none terminal.
-
+    root=PROGRAM();
     //Checks if the End of is the last token. If yes then the parsing is correct.
     if(tk.Get_Token_ID()==End_Of_File)
     {

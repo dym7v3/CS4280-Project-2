@@ -46,7 +46,8 @@ enum TOKEN_ID
     Delimiter_Left_Bracket=32,
     Delimiter_Right_Bracket=33,
     Delimiter_Comma=34,
-    Delimiter_Semi_Colon=35
+    Delimiter_Semi_Colon=35,
+    NO_TOKEN=36
 };
 
 

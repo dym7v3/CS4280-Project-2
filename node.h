@@ -3,8 +3,9 @@
 #define PROJECT_2_NODE_H
 
 #include "token.h"
-
+#include <vector>
 enum NODE_ID {
+    ROOT_Node,
     PROGRAM_Node,
     BLOCK_Node,
     VARS_Node,
@@ -22,6 +23,7 @@ enum NODE_ID {
     LOOP_Node,
     ASSIGN_Node,
     RO_Node,
+    NULL_Node
 };
 
 
@@ -31,11 +33,10 @@ private:
 
 
     NODE_ID Label;
-    Token token;
-    Node Child1;
-    Node Child2;
-    Node Child3;
-    Node Child4;
+    TOKEN_ID  token_id=NO_TOKEN;
+    int line_number;
+    string the_string;
+    vector <Node> Children;
 public:
     Node(); //Default constructor
 
@@ -47,7 +48,13 @@ public:
     void setChild3(Node);
     void setChild4(Node);
     void setToken(Token);
-    Token getToken();
+    NODE_ID getNODE_ID();
+    unsigned int getSizeOfVector();
+    vector<Node> getChild();
+    TOKEN_ID getTokenID();
+    string getTokenString();
+    int getTokenLineNumber();
+
 };
 
 #endif //PROJECT_2_NODE_H
