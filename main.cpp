@@ -55,8 +55,13 @@ int main ( int argc, char *argv[] )
     ofstream preorder(preorder_name.c_str());
 
     Node *p=parser();
-    printParseTree(*p, 0,preorder);
+    printParseTree(*p, 0, preorder);
+    Syntax(*p, 0);
 
+    cout<<"The variables: ";
+    for (const auto &Global : Globals) {
+        cout<<Global<<" , ";
+    }
 
     return 0;
 }

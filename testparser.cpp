@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <winnt.h>
 
 using namespace std;
 const int NODE_IDS_SIZE=18;
@@ -30,9 +31,13 @@ string NodeIds[NODE_IDS_SIZE]={
 
 };
 
+void push(Token);
+int find(string );
+bool verify(string);
+void insert(string);
 
 
-void printParseTree(Node rootP, int level, ostream& output)      /* for debugging */
+void printParseTree(Node rootP, int level, ostream &output)      /* for debugging */
 {
     if (rootP.getNODE_ID()==NULL_Node)
     {
@@ -46,8 +51,8 @@ void printParseTree(Node rootP, int level, ostream& output)      /* for debuggin
             level=level*2;
             for(auto i=0; i<level; i++)
             {
-                cout<<"\t";
-                output<<"\t";
+                cout<<" ";
+                output<<" ";
             }
             level=level/2;
             cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
@@ -60,8 +65,8 @@ void printParseTree(Node rootP, int level, ostream& output)      /* for debuggin
             level=level*2;
             for(auto i=0; i<level; i++)
             {
-                cout<<"\t";
-                output<<"\t";
+                cout<<" ";
+                output<<" ";
             }
             level=level/2;
             cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()]<<endl;
@@ -73,7 +78,101 @@ void printParseTree(Node rootP, int level, ostream& output)      /* for debuggin
     vector <Node> kids=rootP.getChild();
     for(const Node node : kids)
    {
-        printParseTree(node,level+1,output);
+       printParseTree(node, level + 1, output);
    }
 
+}
+
+//<program>  ->     <vars> <block>
+//<block>    ->      Begin <vars> <stats> End
+//<vars>     ->      empty | Var Identifier <mvars>
+//<mvars>    ->     .  | , Identifier <mvars>
+//<expr>     ->      <M> + <expr> | <M> - <expr> | <M>
+//<M>        ->     <F> % <M> | <F> * <M> | <F>
+//<F>        ->      ( <F> ) | <R>
+//<R>        ->      [ <expr> ] | Identifier | Number
+//<stats>    ->      <stat>  <mStat>
+//<mStat>    ->      empty |  <stat>  <mStat>
+//<stat>     ->      <in> | <out> | <block> | <if> | <loop> | <assign>
+//<in>       ->      Input Identifier ;
+//<out>      ->      Output <expr>  ;
+//<if>       ->      Check [ <expr> <RO> <expr> ] <stat>
+//<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
+//<assign>   ->      Identifier : <expr>   ;
+//<RO>       ->      < | <= | >  | >= | ==  |  !=
+
+
+void error(Node node)
+{
+    cout<<"SYNTAX ERROR: The variable "<<node.getTokenString()<<" already exists in the vector on line number: "<<node.getTokenLineNumber()<<endl;
+    cout<<"You can't declare the a variable with the same name twice. The compiler will terminate."<<endl;
+    exit(1);
+}
+
+
+vector<string> Globals;
+
+//This checks the Syntax of the and semantics are good.
+//This is will check if the variables are used properly or not.
+void Syntax(Node rootP, int level)      /* for debugging */
+{
+    if (rootP.getNODE_ID()==VARS_Node || rootP.getNODE_ID()==MVARS_Node)
+    {
+        if(!verify(rootP.getTokenString()))
+        {
+            insert(rootP.getTokenString());
+        }
+        else
+        {
+           error(rootP);
+        }
+    }
+    if(rootP.getNODE_ID()==STAT_Node)
+    {
+        vector <Node> kids=rootP.getChild();
+        for(const Node node : kids)
+        {
+            Syntax(node, level + 1);
+        }
+    }
+
+
+
+
+
+    vector <Node> kids=rootP.getChild();
+    for(const Node node : kids)
+    {
+        Syntax(node, level + 1);
+    }
+}
+
+
+void insert(string value)
+{
+    Globals.push_back(value);
+}
+void push(Token token)
+{
+
+}
+
+int find(string value)
+{
+
+}
+bool verify(string value)
+{
+    if(Globals.empty())
+    {
+        return false;
+    }
+    for (auto &Global : Globals)
+    {
+        if(Global == value)
+        {
+            return true;
+        }
+    }
+    return false;
 }
