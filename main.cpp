@@ -12,7 +12,7 @@
 #include "./FileInputFunction.h"
 #include "scanner.h"
 #include "parser.h"
-#include "testparser.h"
+#include "Semantics.h"
 #include <fstream>
 
 
@@ -56,12 +56,8 @@ int main ( int argc, char *argv[] )
 
     Node *p=parser();
     printParseTree(*p, 0, preorder);
-    Syntax(*p, 0);
-
-    cout<<"The variables: ";
-    for (const auto &Global : Globals) {
-        cout<<Global<<" , ";
-    }
+    SyntaxLocal(*p, 0);
+    printResults();
 
     return 0;
 }

@@ -1,10 +1,9 @@
 #include "node.h"
 #include "scanner.h"
 #include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
 #include <winnt.h>
+#include <stack>
+#include <set>
 
 using namespace std;
 const int NODE_IDS_SIZE=18;
@@ -31,17 +30,17 @@ string NodeIds[NODE_IDS_SIZE]={
 
 };
 
-void push(Token);
 int find(string );
 bool verify(string);
-void insert(string);
+void pop(int);
+void push(string);
 
 
 void printParseTree(Node rootP, int level, ostream &output)      /* for debugging */
 {
     if (rootP.getNODE_ID()==NULL_Node)
     {
-         return;
+        return;
     }
 
     if (rootP.getNODE_ID()!=NULL_Node)
@@ -77,9 +76,9 @@ void printParseTree(Node rootP, int level, ostream &output)      /* for debuggin
 
     vector <Node> kids=rootP.getChild();
     for(const Node node : kids)
-   {
-       printParseTree(node, level + 1, output);
-   }
+    {
+        printParseTree(node, level + 1, output);
+    }
 
 }
 
@@ -110,60 +109,126 @@ void error(Node node)
 }
 
 
-vector<string> Globals;
 
+deque<string> variables;
+vector<string> Globals;
+int varCounter=0;
+int globals=0;
+bool firstBlock=true;
+bool inBlock=false;
 //This checks the Syntax of the and semantics are good.
 //This is will check if the variables are used properly or not.
-void Syntax(Node rootP, int level)      /* for debugging */
+void SyntaxLocal(Node rootP, int level)      /* for debugging */
 {
     if (rootP.getNODE_ID()==VARS_Node || rootP.getNODE_ID()==MVARS_Node)
     {
-        if(!verify(rootP.getTokenString()))
+        if(!find(rootP.getTokenString()))
         {
-            insert(rootP.getTokenString());
+            push(rootP.getTokenString());
         }
         else
         {
-           error(rootP);
+            error(rootP);
+        }
+        if(firstBlock)
+        {
+            globals++;
+        }
+        else
+        {
+            varCounter++;
         }
     }
     if(rootP.getTokenID()==Identifiers && rootP.getNODE_ID()!=VARS_Node && rootP.getNODE_ID()!=MVARS_Node)
     {
-        if(!verify(rootP.getTokenString())){
-
-            cout<<"SYNTAX ERROR: The variable '"<<rootP.getTokenString()<<"' is not declared in scope on line number: "<<rootP.getTokenLineNumber()<<endl;
-            cout<<"The compiler will terminate."<<endl;
-            exit(1);
+        if(!find(rootP.getTokenString()))
+        {
+            if (!verify(rootP.getTokenString()))
+            {
+                cout << "SYNTAX ERROR: The variable '" << rootP.getTokenString()
+                     << "' is not declared in scope on line number: " << rootP.getTokenLineNumber() << endl;
+                cout << "The compiler will terminate." << endl;
+                exit(1);
+            }
         }
+    }
+    if(rootP.getNODE_ID()==BLOCK_Node)
+    {
+        inBlock=true;
+        if(varCounter>0 && inBlock)
+        {
+            pop(varCounter);
+            inBlock=false;
+        }
+        varCounter=0;
+        firstBlock=false;
     }
 
     vector <Node> kids=rootP.getChild();
     for(const Node node : kids)
     {
-        Syntax(node, level + 1);
+        SyntaxLocal(node, level + 1);
     }
 }
-
+void printResults()
+{
+    cout<<"The variables: ";
+    deque<string>::iterator it;
+    for(it=variables.begin(); it!=variables.end(); it++)
+    {
+        cout<<*it<<", ";
+    }
+    cout<<"\nThe amount of the Globals is: "<<globals<<endl;
+    cout<<"The amount of Locals: "<<varCounter<<endl;
+}
 
 void insert(string value)
 {
     Globals.push_back(value);
 }
-void push(Token token)
+void push(string value )
 {
-
+    variables.push_back(value);
 }
 
+void pop(int count)
+{
+    for(int i=count; 0<i; i--)
+    {
+        variables.pop_back();
+    }
+}
 int find(string value)
 {
-
+    if(variables.empty())
+    {
+        return false;
+    }
+    deque<string>::iterator it;
+    it=variables.begin();
+    for(int i=globals; i>0; i--)
+    {
+        it++;
+    }
+    for(; it!=variables.end(); it++)
+    {
+        if(*it==value)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 bool verify(string value)
 {
-
-    for (auto &Global : Globals)
+    if(variables.empty())
     {
-        if(Global == value)
+        return false;
+    }
+    deque<string>::iterator it;
+    for(it=variables.begin(); it!=variables.end(); it++)
+    {
+        if(*it==value)
         {
             return true;
         }
