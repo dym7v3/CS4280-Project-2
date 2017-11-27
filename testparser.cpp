@@ -127,18 +127,15 @@ void Syntax(Node rootP, int level)      /* for debugging */
            error(rootP);
         }
     }
-    if(rootP.getNODE_ID()==STAT_Node)
+    if(rootP.getTokenID()==Identifiers && rootP.getNODE_ID()!=VARS_Node && rootP.getNODE_ID()!=MVARS_Node)
     {
-        vector <Node> kids=rootP.getChild();
-        for(const Node node : kids)
-        {
-            Syntax(node, level + 1);
+        if(!verify(rootP.getTokenString())){
+
+            cout<<"SYNTAX ERROR: The variable '"<<rootP.getTokenString()<<"' is not declared in scope on line number: "<<rootP.getTokenLineNumber()<<endl;
+            cout<<"The compiler will terminate."<<endl;
+            exit(1);
         }
     }
-
-
-
-
 
     vector <Node> kids=rootP.getChild();
     for(const Node node : kids)
@@ -163,10 +160,7 @@ int find(string value)
 }
 bool verify(string value)
 {
-    if(Globals.empty())
-    {
-        return false;
-    }
+
     for (auto &Global : Globals)
     {
         if(Global == value)

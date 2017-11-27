@@ -1,4 +1,8 @@
-Var x , p .
+Var x , y .
 Begin
-   Output x ;
+  Begin
+    Var z .
+    Output z ;
+  End
+  Output z ;
 End
