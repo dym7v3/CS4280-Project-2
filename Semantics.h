@@ -5,11 +5,10 @@
 #ifndef PROJECT_2_SEMANTICS_H
 #define PROJECT_2_SEMANTICS_H
 
+#include <deque>
+
 void printParseTree(Node, int, ostream &);
-void Syntax(Node, int);
-extern vector<string> Globals;
 void SyntaxLocal(Node rootP, int level);
-extern deque<string> variables;
 void printResults();
 
 
