@@ -1,0 +1,17 @@
+0 : NODE --> PROGRAM_Node
+  1 : NODE --> VARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '1' WITH STRING VALUE < x >
+    2 : NODE --> MVARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '1' WITH STRING VALUE < y >
+      3 : NODE --> NULL_Node : TOKEN = '' ON LINE NUMBER = '7207328' WITH STRING VALUE <  >
+  1 : NODE --> BLOCK_Node
+    2 : NODE --> VARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '3' WITH STRING VALUE < z >
+      3 : NODE --> MVARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '3' WITH STRING VALUE < x >
+        4 : NODE --> NULL_Node : TOKEN = '' ON LINE NUMBER = '7207024' WITH STRING VALUE <  >
+    2 : NODE --> STATS_Node
+      3 : NODE --> STAT_Node
+        4 : NODE --> OUT_Node
+          5 : NODE --> EXPR_Node
+            6 : NODE --> M_Node
+              7 : NODE --> F_Node
+                8 : NODE --> F_Node
+                  9 : NODE --> R_Node : TOKEN = 'Integer' ON LINE NUMBER = '4' WITH STRING VALUE < 10 >
+      3 : NODE --> NULL_Node : TOKEN = '' ON LINE NUMBER = '7207352' WITH STRING VALUE <  >

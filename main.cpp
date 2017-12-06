@@ -12,7 +12,8 @@
 #include "./FileInputFunction.h"
 #include "scanner.h"
 #include "parser.h"
-#include "Semantics.h"
+//#include "Semantics.h"
+#include "targetLanguage.h"
 #include <fstream>
 
 
@@ -54,10 +55,15 @@ int main ( int argc, char *argv[] )
     string preorder_name="output.preorder.txt";
     ofstream preorder(preorder_name.c_str());
 
+    string target_name="out.asm";
+    ofstream target(target_name.c_str());
+
     Node *p=parser();
+    //printParseTree(*p, 0, preorder);
+    //SyntaxLocal(*p, 0);
     printParseTree(*p, 0, preorder);
-    SyntaxLocal(*p, 0);
     printResults();
+    codeGeneration(*p, 0, target);
 
     return 0;
 }

@@ -1,8 +1,5 @@
 Var x , y .
 Begin
-   Begin
-      Var w .
-      Output x ;
-   End
-   Output w ;
+  Var z, x  .
+  Output (10) ;
 End

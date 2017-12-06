@@ -1,3 +1,7 @@
+//
+// Created by Dennis Moyseyev on 12/5/2017.
+//
+
 #include "node.h"
 #include "scanner.h"
 #include <iostream>
@@ -6,23 +10,6 @@
 
 using namespace std;
 const int NODE_IDS_SIZE=18;
-//<program>  ->     <vars> <block>
-//<block>    ->      Begin <vars> <stats> End
-//<vars>     ->      empty | Var Identifier <mvars>
-//<mvars>    ->     .  | , Identifier <mvars>
-//<expr>     ->      <M> + <expr> | <M> - <expr> | <M>
-//<M>        ->     <F> % <M> | <F> * <M> | <F>
-//<F>        ->      ( <F> ) | <R>
-//<R>        ->      [ <expr> ] | Identifier | Number
-//<stats>    ->      <stat>  <mStat>
-//<mStat>    ->      empty |  <stat>  <mStat>
-//<stat>     ->      <in> | <out> | <block> | <if> | <loop> | <assign>
-//<in>       ->      Input Identifier ;
-//<out>      ->      Output <expr>  ;
-//<if>       ->      Check [ <expr> <RO> <expr> ] <stat>
-//<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
-//<assign>   ->      Identifier : <expr>   ;
-//<RO>       ->      < | <= | >  | >= | ==  |  !=
 string NodeIds[NODE_IDS_SIZE]={
         "PROGRAM_Node",
         "BLOCK_Node",
@@ -231,6 +218,78 @@ void SyntaxLocal(Node rootP, int level)      /* for debugging */
         }
     }
 }
+
+
+//<program>  ->     <vars> <block>
+//<block>    ->      Begin <vars> <stats> End
+//<vars>     ->      empty | Var Identifier <mvars>
+//<mvars>    ->     .  | , Identifier <mvars>
+//<expr>     ->      <M> + <expr> | <M> - <expr> | <M>
+//<M>        ->     <F> % <M> | <F> * <M> | <F>
+//<F>        ->      ( <F> ) | <R>
+//<R>        ->      [ <expr> ] | Identifier | Number
+//<stats>    ->      <stat>  <mStat>
+//<mStat>    ->      empty |  <stat>  <mStat>
+//<stat>     ->      <in> | <out> | <block> | <if> | <loop> | <assign>
+//<in>       ->      Input Identifier ;
+//<out>      ->      Output <expr>  ;
+//<if>       ->      Check [ <expr> <RO> <expr> ] <stat>
+//<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
+//<assign>   ->      Identifier : <expr>   ;
+//<RO>       ->      < | <= | >  | >= | ==  |  !=
+
+void codeGeneration(Node rootP, int level, ostream &output )
+{
+    switch (rootP.getNODE_ID())
+    {
+        case R_Node :
+        {
+            if(rootP.getTokenID()==Identifiers || rootP.getTokenID()==Integer)
+            {
+                output<<"LOAD "<<rootP.getTokenString()<<endl;
+            }
+            else
+            {
+                vector<Node> kids = rootP.getChild();
+                for (const Node node : kids)
+                {
+                    codeGeneration(node, level + 1, output);
+                }
+            }
+
+        }
+        break;
+        case F_Node:
+        {
+            vector<Node> kids = rootP.getChild();
+            for (Node node : kids)
+            {
+                if(node.getNODE_ID()==F_Node)
+                {
+                    codeGeneration(node, level + 1, output);
+                    output<<"MULT -1"<<endl;
+                } else{
+                    codeGeneration(node, level + 1, output);
+                }
+            }
+        }
+        break;
+        default:
+        {
+            vector<Node> kids = rootP.getChild();
+            for (const Node node : kids)
+            {
+                codeGeneration(node, level + 1, output);
+            }
+        }
+        break;
+    }
+
+}
+
+
+
+
 
 
 
