@@ -1,7 +1,6 @@
 #include "node.h"
 #include "scanner.h"
 #include <iostream>
-#include <winnt.h>
 #include <stack>
 
 using namespace std;
@@ -117,18 +116,6 @@ void printParseTree(Node rootP, int level, ostream &output)      /* for debuggin
 {
     if (rootP.getNODE_ID()==NULL_Node)
     {
-
-        level=level*2;
-        for(auto i=0; i<level; i++)
-        {
-            cout<<" ";
-            output<<" ";
-        }
-        level=level/2;
-        cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
-        output<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
-        cout << " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE : < " << rootP.getTokenString()<<" >"<<endl;
-        output<< " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE < "<< rootP.getTokenString()<<" >"<< endl;
         return;
     }
 

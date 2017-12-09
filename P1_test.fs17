@@ -1,5 +1,3 @@
-Var x , y .
 Begin
-  Var z, x  .
-  Output (10) ;
+  Output 2*3 ;
 End

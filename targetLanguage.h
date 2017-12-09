@@ -4,13 +4,7 @@
 #include <deque>
 #include "node.h"
 
-void printParseTree(Node, int, ostream &);
-void SyntaxLocal(Node rootP, int level);
-void printResults();
-int find(string);
-bool verify(string);
-void pop(int);
-void push(string);
-void codeGeneration(Node, int , ostream &);
+void codeGeneration(Node, ostream &);
+extern vector<string> varaibles;
 
 #endif //PROJECT_2_TARGETLANGUAGE_H

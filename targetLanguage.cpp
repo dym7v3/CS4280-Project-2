@@ -3,245 +3,168 @@
 //
 
 #include "node.h"
-#include "scanner.h"
 #include <iostream>
-#include <winnt.h>
 #include <stack>
 
 using namespace std;
-const int NODE_IDS_SIZE=18;
-string NodeIds[NODE_IDS_SIZE]={
-        "PROGRAM_Node",
-        "BLOCK_Node",
-        "VARS_Node",
-        "MVARS_Node",
-        "EXPR_Node",
-        "M_Node",
-        "F_Node",
-        "R_Node",
-        "STATS_Node",
-        "MSTAT_Node",
-        "STAT_Node",
-        "IN_Node",
-        "OUT_Node",
-        "IFF_Node",
-        "LOOP_Node",
-        "ASSIGN_Node",
-        "RO_Node",
-        "NULL_Node"
 
-};
-
-deque<string> variables;
-int varCounter=0;
-int globals=0;
-bool firstBlock=true;
-
-void printResults()
-{
-    cout<<"The variables: ";
-    deque<string>::iterator it;
-    for(it=variables.begin(); it!=variables.end(); it++)
-    {
-        cout<<*it<<", ";
-    }
-    cout<<"\nThe amount of the Globals is: "<<globals<<endl;
-    cout<<"The amount of Locals: "<<varCounter<<endl;
-}
-
-void push(string value )
-{
-    variables.push_back(value);
-}
-
-void pop(int count)
-{
-    for(int i=count; 0<i; i--)
-    {
-        variables.pop_back();
-    }
-}
-int find(string value)
-{
-    if(variables.empty())
-    {
-        return false;
-    }
-    deque<string>::iterator it;
-    it=variables.begin();
-    for(int i=globals; i>0; i--)
-    {
-        it++;
-    }
-
-    for(; it!=variables.end(); it++)
-    {
-        if(*it==value)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-bool verify(string value)
-{
-    if(variables.empty())
-    {
-        return false;
-    }
-    deque<string>::iterator it;
-    for(it=variables.begin(); it!=variables.end(); it++)
-    {
-        if(*it==value)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void printParseTree(Node rootP, int level, ostream &output)      /* for debugging */
-{
-    if (rootP.getNODE_ID()==NULL_Node)
-    {
-
-        level=level*2;
-        for(auto i=0; i<level; i++)
-        {
-            cout<<" ";
-            output<<" ";
-        }
-        level=level/2;
-        cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
-        output<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
-        cout << " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE : < " << rootP.getTokenString()<<" >"<<endl;
-        output<< " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE < "<< rootP.getTokenString()<<" >"<< endl;
-        return;
-    }
-
-    if (rootP.getNODE_ID()!=NULL_Node)
-    {
-        if(rootP.getTokenID()!=NO_TOKEN)
-        {
-            level=level*2;
-            for(auto i=0; i<level; i++)
-            {
-                cout<<" ";
-                output<<" ";
-            }
-            level=level/2;
-            cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
-            output<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()];
-            cout << " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE : < " << rootP.getTokenString()<<" >"<<endl;
-            output<< " : TOKEN = '" << TOKEN_IDS_TO_STRING_ARRAY[rootP.getTokenID()] << "' ON LINE NUMBER = '" << rootP.getTokenLineNumber()<< "' WITH STRING VALUE < "<< rootP.getTokenString()<<" >"<< endl;
-        }
-        else
-        {
-            level=level*2;
-            for(auto i=0; i<level; i++)
-            {
-                cout<<" ";
-                output<<" ";
-            }
-            level=level/2;
-            cout<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()]<<endl;
-            output<<level<<" : NODE --> "<<NodeIds[rootP.getNODE_ID()]<<endl;
-        }
-    }
-
-    vector <Node> kids=rootP.getChild();
-    for(const Node node : kids)
-    {
-        printParseTree(node, level + 1, output);
-    }
-
-}
-
-
-void error(Node node)
-{
-    cout<<"SYNTAX ERROR: The variable "<<node.getTokenString()<<" already exists in the vector on line number: "<<node.getTokenLineNumber()<<endl;
-    cout<<"You can't declare the a variable with the same name twice. The compiler will terminate."<<endl;
-    exit(1);
-}
-
-//This checks the Syntax of the and semantics are good.
-//This is will check if the variables are used properly or not.
-void SyntaxLocal(Node rootP, int level)      /* for debugging */
-{
-    if (rootP.getNODE_ID()==VARS_Node || rootP.getNODE_ID()==MVARS_Node)
-    {
-        if(!find(rootP.getTokenString()) && !firstBlock)
-        {
-            push(rootP.getTokenString());
-            varCounter++;
-        }
-        else if(!verify(rootP.getTokenString()) && firstBlock)
-        {
-            push(rootP.getTokenString());
-            globals++;
-        }
-        else {
-            error(rootP);
-        }
-
-    }
-    if(rootP.getTokenID()==Identifiers && rootP.getNODE_ID()!=VARS_Node && rootP.getNODE_ID()!=MVARS_Node)
-    {
-        if(!find(rootP.getTokenString()))
-        {
-            if (!verify(rootP.getTokenString()))
-            {
-                cout << "SYNTAX ERROR: The variable '" << rootP.getTokenString()
-                     << "' is not declared in scope on line number: " << rootP.getTokenLineNumber() << endl;
-                cout << "The compiler will terminate." << endl;
-                exit(1);
-            }
-        }
-    }
-    if(rootP.getNODE_ID()==BLOCK_Node)
-    {
-        firstBlock=false;
-        vector <Node> kids=rootP.getChild();
-        for(const Node node : kids)
-        {
-            SyntaxLocal(node, level + 1);
-        }
-        pop(varCounter);
-        varCounter=0;
-    }
-    else
-    {
-        vector<Node> kids = rootP.getChild();
-        for (const Node node : kids) {
-            SyntaxLocal(node, level + 1);
-        }
-    }
-}
-
-
-//<program>  ->     <vars> <block>
-//<block>    ->      Begin <vars> <stats> End
-//<vars>     ->      empty | Var Identifier <mvars>
-//<mvars>    ->     .  | , Identifier <mvars>
-//<expr>     ->      <M> + <expr> | <M> - <expr> | <M>
-//<M>        ->     <F> % <M> | <F> * <M> | <F>
-//<F>        ->      ( <F> ) | <R>
-//<R>        ->      [ <expr> ] | Identifier | Number
-//<stats>    ->      <stat>  <mStat>
-//<mStat>    ->      empty |  <stat>  <mStat>
-//<stat>     ->      <in> | <out> | <block> | <if> | <loop> | <assign>
-//<in>       ->      Input Identifier ;
-//<out>      ->      Output <expr>  ;
+//<program>  ->     <vars> <block> (Done)
+//<block>    ->      Begin <vars> <stats> End (Done)
+//<vars>     ->      empty | Var Identifier <mvars> (Done)
+//<mvars>    ->     .  | , Identifier <mvars> (Done)
+//<expr>     ->      <M> + <expr> | <M> - <expr> | <M> (Done)
+//<M>        ->     <F> % <M> | <F> * <M> | <F> (Done)
+//<F>        ->      ( <F> ) | <R> (Done)
+//<R>        ->      [ <expr> ] | Identifier | Number (Done)
+//<stats>    ->      <stat>  <mStat> (Done)
+//<mStat>    ->      empty |  <stat>  <mStat> (Done)
+//<stat>     ->      <in> | <out> | <block> | <if> | <loop> | <assign> (Done)
+//<in>       ->      Input Identifier ; (Done)
+//<out>      ->      Output <expr>  ; (Done)
 //<if>       ->      Check [ <expr> <RO> <expr> ] <stat>
 //<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
-//<assign>   ->      Identifier : <expr>   ;
+//<assign>   ->      Identifier : <expr>   ; (Done)
 //<RO>       ->      < | <= | >  | >= | ==  |  !=
+int VarCounter=0;
+vector<string> varaibles;
 
-void codeGeneration(Node rootP, int level, ostream &output )
+Node Child3;
+Node Child4;
+bool expr_exists=false;
+bool m_node_exists=false;
+
+void error()
+{
+    cout<<"CODE GENERATION ERROR: Could not go forward because didn't find the need children. "<<endl;
+    exit(1);
+}
+string makeTempVariable()
+{
+    string variable="V";
+    variable+=to_string(VarCounter);
+    VarCounter++;
+    varaibles.push_back(variable);
+    return variable;
+}
+
+void codeGeneration(Node rootP, ostream &output )
 {
     switch (rootP.getNODE_ID())
     {
+
+        //<M> -> <F> % <M> | <F> * <M> | <F>
+        case  M_Node:
+        {
+            Node Child1;
+            Node Child2;
+            vector<Node> kids = rootP.getChild();
+            for (Node node : kids)
+            {
+                if (node.getNODE_ID() == M_Node)
+                {
+                    Child2=node;
+                    m_node_exists=true;
+                }
+                if(node.getNODE_ID() == F_Node)
+                {
+                    Child1=node;
+                }
+            }
+            if(m_node_exists)
+            {
+                m_node_exists=false;
+                codeGeneration(Child2, output);
+                string temp=makeTempVariable();
+                output<<"STORE "<<temp<<endl;
+                codeGeneration(Child1, output);
+                if(rootP.getTokenID()==Operator_Multiply)
+                {
+                    output<<"MULT "<<temp<<endl;
+                }
+                else
+                {
+                    output<<"DIV "<<temp<<endl;
+                }
+            }
+            else
+            {
+                codeGeneration(Child1, output);
+            }
+        }
+        break;
+        //<out> -> Output <expr>  ;
+        case OUT_Node:
+        {
+            vector<Node> kids = rootP.getChild();
+            for (const Node node : kids)
+            {
+                codeGeneration(node, output);
+            }
+            string temp=makeTempVariable();
+            output<<"STORE "+temp<<endl;
+            output<<"WRITE "+temp<<endl;
+        }
+        break;
+
+        case IN_Node:
+        {
+            output<<"READ "<<rootP.getTokenString()<<endl;
+        }
+        break;
+
+        case EXPR_Node:
+        {
+            Node Child1;
+            Node Child2;
+            //<expr> -> <M> + <expr> | <M> - <expr> | <M>
+            vector<Node> kids = rootP.getChild();
+            for (Node node : kids)
+            {
+                if (node.getNODE_ID() == EXPR_Node)
+                {
+                    Child2=node;
+                    expr_exists=true;
+                }
+                if(node.getNODE_ID() == M_Node)
+                {
+                    Child1=node;
+                }
+            }
+            if(expr_exists)
+            {
+                expr_exists=false;
+                codeGeneration(Child2, output);
+                string temp=makeTempVariable();
+                output<<"STORE "<<temp<<endl;
+                codeGeneration(Child1, output);
+                if(rootP.getTokenID()==Operator_Plus)
+                {
+                    output<<"ADD "<<temp<<endl;
+                }
+                else
+                {
+                    output<<"SUB "<<temp<<endl;
+                }
+            }
+            else
+            {
+                codeGeneration(Child1, output);
+            }
+        }
+        break;
+        case ASSIGN_Node:
+        {
+            vector<Node> kids = rootP.getChild();
+            for (Node node : kids)
+            {
+                if(node.getNODE_ID()==EXPR_Node) {
+                    codeGeneration(node, output);
+                } else
+                    error();
+            }
+            output<<"STORE "<<rootP.getTokenString()<<endl;
+        }
+        break;
         case R_Node :
         {
             if(rootP.getTokenID()==Identifiers || rootP.getTokenID()==Integer)
@@ -251,9 +174,13 @@ void codeGeneration(Node rootP, int level, ostream &output )
             else
             {
                 vector<Node> kids = rootP.getChild();
-                for (const Node node : kids)
+                for (Node node : kids)
                 {
-                    codeGeneration(node, level + 1, output);
+                    if(node.getNODE_ID()==EXPR_Node){
+                        codeGeneration(node, output);
+                    } else {
+                        error();
+                    }
                 }
             }
 
@@ -266,10 +193,10 @@ void codeGeneration(Node rootP, int level, ostream &output )
             {
                 if(node.getNODE_ID()==F_Node)
                 {
-                    codeGeneration(node, level + 1, output);
+                    codeGeneration(node, output);
                     output<<"MULT -1"<<endl;
                 } else{
-                    codeGeneration(node, level + 1, output);
+                    codeGeneration(node, output);
                 }
             }
         }
@@ -279,7 +206,7 @@ void codeGeneration(Node rootP, int level, ostream &output )
             vector<Node> kids = rootP.getChild();
             for (const Node node : kids)
             {
-                codeGeneration(node, level + 1, output);
+                codeGeneration(node, output);
             }
         }
         break;
@@ -319,7 +246,7 @@ Now EXPR
  The second case:
  EXPR-->M and EXPR-->EXRP
  You need to create the a temporary variable to be able to store the value so that you can get it out of the
- accumulater. You want to go with the right one first and then to the left node.
+ accumulater. You want to do with the right one first and then to the left node.
  First call the child 2. When it comes back it the value will be saved in a the accumlater. Then i need to create
  a temporary variable and then I save the value from the accumlater into the temp variable.
  Call node 2
