@@ -21,7 +21,7 @@ using namespace std;
 //<stat>     ->      <in> | <out> | <block> | <if> | <loop> | <assign> (Done)
 //<in>       ->      Input Identifier ; (Done)
 //<out>      ->      Output <expr>  ; (Done)
-//<if>       ->      Check [ <expr> <RO> <expr> ] <stat>
+//<if>       ->      Check [ <expr> <RO> <expr> ] <stat> (Done)
 //<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
 //<assign>   ->      Identifier : <expr>   ; (Done)
 //<RO>       ->      < | <= | >  | >= | ==  |  !=
@@ -131,6 +131,160 @@ void codeGeneration(Node rootP, ostream &output )
 {
     switch (rootP.getNODE_ID())
     {
+
+        case LOOP_Node:
+        {
+            Node Child1;
+            Node Child2;
+            Node Child3;
+            Node Child4;
+            bool child1NotSeenYet=true;
+            vector<Node> kids = rootP.getChild();
+            for (Node node : kids)
+            {
+                if(node.getNODE_ID()==EXPR_Node&&child1NotSeenYet)
+                {
+                    child1NotSeenYet=false;
+                    Child1=node;
+                }
+                if(node.getNODE_ID()==RO_Node)
+                {
+                    Child2=node;
+                }
+                if(node.getNODE_ID()==EXPR_Node && !child1NotSeenYet)
+                {
+                    Child3=node;
+                }
+                if(node.getNODE_ID()==STAT_Node)
+                {
+                    Child4=node;
+                }
+            }
+
+            if(Child2.getTokenID()==Operator_Greater_Than)
+            {
+                string label = makeLabel();
+                output << label << ": NOOP" << endl;
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label1 = makeLabel();
+                output << "BRZNEG " << label1 << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output<<"BR "<<label<<endl;
+                output << label1 << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Less_Than)
+            {
+                string label = makeLabel();
+                output << label << ": NOOP" << endl;
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label1 = makeLabel();
+                output << "BRZPOS " << label1 << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output<<"BR "<<label<<endl;
+                output << label1 << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Less_Than_Or_Equal_To)
+            {
+                string label = makeLabel();
+                output << label << ": NOOP" << endl;
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label1 = makeLabel();
+                output << "BRPOS " << label1 << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output<<"BR "<<label<<endl;
+                output << label1 << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Greater_Than_Or_Equal_To)
+            {
+                string label = makeLabel();
+                output << label << ": NOOP" << endl;
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label1 = makeLabel();
+                output << "BRNEG " << label1 << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output<<"BR "<<label<<endl;
+                output << label1 << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Equal_To)
+            {
+                string label = makeLabel();
+                output << label << ": NOOP" << endl;
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label1 = makeLabel();
+                output << "BRNEG " << label1 << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output<<"BR "<<label<<endl;
+                output << label1 << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Not_Equal_To)
+            {
+                string label = makeLabel();
+                output << label << ": NOOP" << endl;
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label1 = makeLabel();
+                output << "BRZERO " << label1 << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output<<"BR "<<label<<endl;
+                output << label1 << ": NOOP" << endl;
+            }
+
+
+        }
+        break;
 
         case IFF_Node:
         {
@@ -506,125 +660,4 @@ void codeGeneration(Node rootP, ostream &output )
     }
 
 }
-
-
-
-
-
-
-
-/*This will be the function for R node Function:
-R->EXPR (nothing gets generated bu rather calls it child node
-Or when R->ID | Number
-printf("LOAD %s", rootP.getTokenIdString());
-No to check which case it is.
-If it has a child then it is the first case.
-If it has a token or number then it is the second case.
-
-Now ASSIGN Function:
-It this usually have a token that is an identifier.
-Then there is a child. And we are not doing the child just the part for the assign function.
- First call the child node. When this returns that means that the value will be in the accumlater.
- How do we move it to the accumlater. All we would need to do is use the STORE function in the ambessly.
- pinrtf("STORE %s", rootP.getNodeTokeString); --> LOAD X
-
-
-Now EXPR
-
- Remember that we are always do the only the top part. There is two case:
- EXRP-->M (Call the child)
-
- How do you determine cases is if there is a child or token. Child in the first case.
-
- The second case:
- EXPR-->M and EXPR-->EXRP
- You need to create the a temporary variable to be able to store the value so that you can get it out of the
- accumulater. You want to do with the right one first and then to the left node.
- First call the child 2. When it comes back it the value will be saved in a the accumlater. Then i need to create
- a temporary variable and then I save the value from the accumlater into the temp variable.
- Call node 2
- Create Temp
- printF("STORE %S", temp_varialbe) --> (STORE T1)
- In order to have these temporary variables we will just not allow for certian names to be used
- for variables in the program.
-
- Call Child 1 and then
- if(Token is + )
-    print("ADD %s", temp_variable) -->(ADD T1)
- else
-    print("SUB %s", temp_variable) -->(SUB T1)
-
-
-
- The OUT_NODE
- OUT-->EXPR (Remember that we are only making the code for the OUT node not EXPR)
- 1) Call the child to evaluate the expression
- 2) Then create a TEMP variable.
- 3) Print (STORE to the temp variable)
- 4) Print (WRITE to the temp variable)
-
- Two Cases for F
- F-->F (In this case you need to negate whatever comes back to you)
- F-->R
-
- You can figure out which case all you need to do is check the children on the node.
-
- case 2: Just call the child
- case 1: printf("Mult -1") (MULT -1)
-
-
-
-
-
-
- Traversal ()
- {
- counter=0;
- switch (Node){
-    "Block":
-        counter=0;
-        call vars
-        call stats
-        pop the variables and do whatever you need to do when leaving the block.
-
-        break
-    }
-}
-
-
-IFF-->Expr
-IFF-->RO
-IFF-->Expr
-IFF-->stat
-
-{ This is one
-    Call Child3
-    Make TEMP_variable
-    PrintF("STORE %S",TEMP_Variable)
-    Call Child1
-    Printf("SUB %S",TEMP_Variable)
-}
-
- { Jump this is number one.
-     create a Label = Label_created
-     printF("BRZNEG %S", Label_created) //Ifs based on RO Token.
- }
-
- { This is number 3
-    Call Child4
-    printf("%S: NOOP", Label_created)
-
- }
-
- We save the labels locally.
- This is ^ what you implement when you get an iff node.
- If you use the labels and variables Globally then you won't have the ability to do nested variables.
-
- The only difference for loop is that you have two Labels and you jump out.
-
-  */
-
-
-
-
 
