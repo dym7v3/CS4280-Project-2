@@ -1,14 +1,5 @@
 Var x , y , z .
 Begin
-  Var a , b .
-  Output x + a ;
-  Begin
-    Var x .
-    Output x ;
-  End
-  Begin
-    Var x .
-    Output x ;
-  End
-  Output x ;
+  Check[5==5]
+    Output 1;
 End

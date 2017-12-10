@@ -30,9 +30,11 @@ deque<string> variables;
 int varCounter=0;
 int globals=0;
 int VarCounter=0;
+int LabelCounter=0;
 bool firstBlock=true;
 bool expr_exists=false;
 bool m_node_exists=false;
+
 
 void printResults()
 {
@@ -110,6 +112,13 @@ string makeTempVariable()
     varaibles.push_back(variable);
     return variable;
 }
+string makeLabel()
+{
+    string label="L";
+    label+=to_string(LabelCounter);
+    LabelCounter++;
+    return label;
+}
 void error(Node node)
 {
     cout<<"SYNTAX ERROR: The variable "<<node.getTokenString()<<" already exists in the vector on line number: "<<node.getTokenLineNumber()<<endl;
@@ -122,6 +131,145 @@ void codeGeneration(Node rootP, ostream &output )
 {
     switch (rootP.getNODE_ID())
     {
+
+        case IFF_Node:
+        {
+            Node Child1;
+            Node Child2;
+            Node Child3;
+            Node Child4;
+            bool child1NotSeenYet=true;
+            vector<Node> kids = rootP.getChild();
+            for (Node node : kids)
+            {
+               if(node.getNODE_ID()==EXPR_Node&&child1NotSeenYet)
+               {
+                   child1NotSeenYet=false;
+                   Child1=node;
+               }
+               if(node.getNODE_ID()==RO_Node)
+               {
+                   Child2=node;
+               }
+               if(node.getNODE_ID()==EXPR_Node && !child1NotSeenYet)
+               {
+                   Child3=node;
+               }
+               if(node.getNODE_ID()==STAT_Node)
+               {
+                   Child4=node;
+               }
+            }
+
+            if(Child2.getTokenID()==Operator_Greater_Than)
+            {
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label = makeLabel();
+                output << "BRZNEG " << label << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output << label << ": NOOP" << endl;
+
+            }
+            if(Child2.getTokenID()==Operator_Less_Than)
+            {
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label = makeLabel();
+                output << "BRZPOS " << label << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output << label << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Greater_Than_Or_Equal_To)
+            {
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label = makeLabel();
+                output << "BRNEG " << label << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output << label << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Less_Than_Or_Equal_To)
+            {
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label = makeLabel();
+                output << "BRPOS " << label << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output << label << ": NOOP" << endl;
+            }
+            if(Child2.getTokenID()==Operator_Not_Equal_To)
+            {
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label = makeLabel();
+                output << "BRZERO " << label << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output << label << ": NOOP" << endl;
+
+            }
+            if(Child2.getTokenID()==Operator_Equal_To)
+            {
+                //Call child3
+                codeGeneration(Child3, output);
+                //Generate temp variable.
+                string temp = makeTempVariable();
+                output << "STORE " << temp << endl;
+                //Call Child1
+                codeGeneration(Child1, output);
+                output << "SUB " << temp << endl;
+                //Create Label
+                string label = makeLabel();
+                output << "BRNEG " << label << endl;
+                //Call Child4
+                codeGeneration(Child4, output);
+                output << label << ": NOOP" << endl;
+            }
+
+
+        }
+        break;
+
         //<vars> ->  empty | Var Identifier <mvars>
         //<mvars> -> .  | , Identifier <mvars>
         case VARS_Node:

@@ -3,45 +3,21 @@
     2 : NODE --> MVARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '1' WITH STRING VALUE < y >
       3 : NODE --> MVARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '1' WITH STRING VALUE < z >
   1 : NODE --> BLOCK_Node
-    2 : NODE --> VARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '3' WITH STRING VALUE < a >
-      3 : NODE --> MVARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '3' WITH STRING VALUE < b >
     2 : NODE --> STATS_Node
       3 : NODE --> STAT_Node
-        4 : NODE --> OUT_Node
-          5 : NODE --> EXPR_Node : TOKEN = 'Operator_Plus' ON LINE NUMBER = '4' WITH STRING VALUE < + >
+        4 : NODE --> IFF_Node
+          5 : NODE --> EXPR_Node
             6 : NODE --> M_Node
               7 : NODE --> F_Node
-                8 : NODE --> R_Node : TOKEN = 'Identifier' ON LINE NUMBER = '4' WITH STRING VALUE < x >
-            6 : NODE --> EXPR_Node
-              7 : NODE --> M_Node
-                8 : NODE --> F_Node
-                  9 : NODE --> R_Node : TOKEN = 'Identifier' ON LINE NUMBER = '4' WITH STRING VALUE < a >
-      3 : NODE --> MSTAT_Node
-        4 : NODE --> STAT_Node
-          5 : NODE --> BLOCK_Node
-            6 : NODE --> VARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '6' WITH STRING VALUE < x >
-            6 : NODE --> STATS_Node
-              7 : NODE --> STAT_Node
-                8 : NODE --> OUT_Node
-                  9 : NODE --> EXPR_Node
-                    10 : NODE --> M_Node
-                      11 : NODE --> F_Node
-                        12 : NODE --> R_Node : TOKEN = 'Identifier' ON LINE NUMBER = '7' WITH STRING VALUE < x >
-        4 : NODE --> MSTAT_Node
+                8 : NODE --> R_Node : TOKEN = 'Integer' ON LINE NUMBER = '3' WITH STRING VALUE < 5 >
+          5 : NODE --> RO_Node : TOKEN = 'Operator_Equal_To' ON LINE NUMBER = '3' WITH STRING VALUE < == >
+          5 : NODE --> EXPR_Node
+            6 : NODE --> M_Node
+              7 : NODE --> F_Node
+                8 : NODE --> R_Node : TOKEN = 'Integer' ON LINE NUMBER = '3' WITH STRING VALUE < 5 >
           5 : NODE --> STAT_Node
-            6 : NODE --> BLOCK_Node
-              7 : NODE --> VARS_Node : TOKEN = 'Identifier' ON LINE NUMBER = '10' WITH STRING VALUE < x >
-              7 : NODE --> STATS_Node
-                8 : NODE --> STAT_Node
-                  9 : NODE --> OUT_Node
-                    10 : NODE --> EXPR_Node
-                      11 : NODE --> M_Node
-                        12 : NODE --> F_Node
-                          13 : NODE --> R_Node : TOKEN = 'Identifier' ON LINE NUMBER = '11' WITH STRING VALUE < x >
-          5 : NODE --> MSTAT_Node
-            6 : NODE --> STAT_Node
-              7 : NODE --> OUT_Node
-                8 : NODE --> EXPR_Node
-                  9 : NODE --> M_Node
-                    10 : NODE --> F_Node
-                      11 : NODE --> R_Node : TOKEN = 'Identifier' ON LINE NUMBER = '13' WITH STRING VALUE < x >
+            6 : NODE --> OUT_Node
+              7 : NODE --> EXPR_Node
+                8 : NODE --> M_Node
+                  9 : NODE --> F_Node
+                    10 : NODE --> R_Node : TOKEN = 'Integer' ON LINE NUMBER = '4' WITH STRING VALUE < 1 >
