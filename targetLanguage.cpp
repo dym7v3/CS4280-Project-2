@@ -123,21 +123,8 @@ void codeGeneration(Node rootP, ostream &output )
     switch (rootP.getNODE_ID())
     {
         //<vars> ->  empty | Var Identifier <mvars>
-        case VARS_Node:
-        {
-            if (!find(rootP.getTokenString()) && !firstBlock) {
-                push(rootP.getTokenString());
-                varCounter++;
-            } else if (!verify(rootP.getTokenString()) && firstBlock) {
-                push(rootP.getTokenString());
-                globals++;
-            } else {
-                error(rootP);
-            }
-        }
-        break;
-
         //<mvars> -> .  | , Identifier <mvars>
+        case VARS_Node:
         case MVARS_Node:
         {
             if (!find(rootP.getTokenString()) && !firstBlock) {
@@ -148,6 +135,12 @@ void codeGeneration(Node rootP, ostream &output )
                 globals++;
             } else {
                 error(rootP);
+            }
+            //Afterwards calls the children so that it can then can get the rest of the variables saved.
+            vector<Node> kids = rootP.getChild();
+            for (const Node &node : kids)
+            {
+                codeGeneration(node, output);
             }
         }
         break;
@@ -232,10 +225,8 @@ void codeGeneration(Node rootP, ostream &output )
                         exit(1);
                     }
                 }
-                output<<"READ "<<rootP.getTokenString()<<endl;
-            } else
-                error();
-
+            }
+            output<<"READ "<<rootP.getTokenString()<<endl;
         }
         break;
 

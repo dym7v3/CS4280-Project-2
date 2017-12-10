@@ -1,3 +1,14 @@
+Var x , y , z .
 Begin
-  Output 2*3 ;
+  Var a , b .
+  Output x + a ;
+  Begin
+    Var x .
+    Output x ;
+  End
+  Begin
+    Var x .
+    Output x ;
+  End
+  Output x ;
 End
