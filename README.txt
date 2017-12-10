@@ -1,3 +1,3 @@
 Static Semantics: LOCAL
-Storage: LOCAL
+Storage: GLOBAL
 

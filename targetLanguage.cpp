@@ -58,7 +58,6 @@ void push(const string value, bool firstBlock)
     {
         LOCAL.push_back(value);
         Local_Variables_to_be_stored.push_back(value);
-        cout << "Pushed a Local variable : " << value << endl;
         scope_variable_count.back()+=1;
     }
 }
@@ -68,7 +67,6 @@ void pop()
     for(int i=scope_variable_count.back(); 0<i; i--)
     {
         LOCAL.pop_back();
-        cout<<"Popped a variable"<<endl;
     }
     scope_variable_count.pop_back();
 }

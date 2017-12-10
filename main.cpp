@@ -12,7 +12,6 @@
 #include "./FileInputFunction.h"
 #include "scanner.h"
 #include "parser.h"
-#include "Semantics.h"
 #include "targetLanguage.h"
 #include <fstream>
 
@@ -59,7 +58,7 @@ int main ( int argc, char *argv[] )
     ofstream target(target_name.c_str());
 
     Node *p=parser();
-    printParseTree(*p, 0, preorder);
+    //printParseTree(*p, 0, preorder);
     //printResults();
     codeGeneration(*p, target);
     target<<"STOP 0"<<endl;
