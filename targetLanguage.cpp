@@ -3,8 +3,8 @@
 //
 
 #include "node.h"
+#include "targetLanguage.h"
 #include <iostream>
-#include <stack>
 
 using namespace std;
 
@@ -25,55 +25,62 @@ using namespace std;
 //<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
 //<assign>   ->      Identifier : <expr>   ; (Done)
 //<RO>       ->      < | <= | >  | >= | ==  |  !=
-vector<string> varaibles;
-deque<string> variables;
-int varCounter=0;
-int globals=0;
+vector<string> LOCAL;
+deque<int>scope_variable_count;
+vector<string> GLOBALS;
+vector<string>Local_Variables_to_be_stored;
 int VarCounter=0;
 int LabelCounter=0;
 bool firstBlock=true;
 bool expr_exists=false;
 bool m_node_exists=false;
 
+//
+//void printResults()
+//{
+//    cout<<"The variables: ";
+//    deque<string>::iterator it;
+//    for(it=variables.begin(); it!=variables.end(); it++)
+//    {
+//        cout<<*it<<", ";
+//    }
+//    cout<<"\nThe amount of the Globals is: "<<globals<<endl;
+//    cout<<"The amount of Locals: "<<varCounter<<endl;
+//}
 
-void printResults()
+void push(const string value, bool firstBlock)
 {
-    cout<<"The variables: ";
-    deque<string>::iterator it;
-    for(it=variables.begin(); it!=variables.end(); it++)
+    if(firstBlock)
     {
-        cout<<*it<<", ";
+        GLOBALS.push_back(value);
     }
-    cout<<"\nThe amount of the Globals is: "<<globals<<endl;
-    cout<<"The amount of Locals: "<<varCounter<<endl;
+    else
+    {
+        LOCAL.push_back(value);
+        Local_Variables_to_be_stored.push_back(value);
+        cout << "Pushed a Local variable : " << value << endl;
+        scope_variable_count.back()+=1;
+    }
 }
 
-void push(const string value)
+void pop()
 {
-    variables.push_back(value);
-}
-
-void pop(int count)
-{
-    for(int i=count; 0<i; i--)
+    for(int i=scope_variable_count.back(); 0<i; i--)
     {
-        variables.pop_back();
+        LOCAL.pop_back();
+        cout<<"Popped a variable"<<endl;
     }
+    scope_variable_count.pop_back();
 }
 int find(const string value)
 {
-    if(variables.empty())
+    if(LOCAL.empty())
     {
         return false;
     }
-    deque<string>::iterator it;
-    it=variables.begin();
-    for(int i=globals; i>0; i--)
-    {
-        it++;
-    }
-
-    for(; it!=variables.end(); it++)
+    vector<string>::iterator it;
+    it=LOCAL.begin();
+    for(; it!=LOCAL.end(); it++)
     {
         if(*it==value)
         {
@@ -84,12 +91,12 @@ int find(const string value)
 }
 bool verify(const string value)
 {
-    if(variables.empty())
+    if(GLOBALS.empty())
     {
         return false;
     }
-    deque<string>::iterator it;
-    for(it=variables.begin(); it!=variables.end(); it++)
+    vector<string>::iterator it;
+    for(it=GLOBALS.begin(); it!=GLOBALS.end(); it++)
     {
         if(*it==value)
         {
@@ -109,7 +116,7 @@ string makeTempVariable()
     string variable="V";
     variable+=to_string(VarCounter);
     VarCounter++;
-    varaibles.push_back(variable);
+    GLOBALS.push_back(variable);
     return variable;
 }
 string makeLabel()
@@ -127,7 +134,7 @@ void error(Node node)
 }
 
 
-void codeGeneration(Node rootP, ostream &output )
+void codeGeneration(Node rootP, ostream &output)
 {
     switch (rootP.getNODE_ID())
     {
@@ -430,11 +437,9 @@ void codeGeneration(Node rootP, ostream &output )
         case MVARS_Node:
         {
             if (!find(rootP.getTokenString()) && !firstBlock) {
-                push(rootP.getTokenString());
-                varCounter++;
+                push(rootP.getTokenString(), firstBlock);
             } else if (!verify(rootP.getTokenString()) && firstBlock) {
-                push(rootP.getTokenString());
-                globals++;
+                push(rootP.getTokenString(), firstBlock);
             } else {
                 error(rootP);
             }
@@ -450,14 +455,15 @@ void codeGeneration(Node rootP, ostream &output )
         //<block> ->  Begin <vars> <stats> End
         case BLOCK_Node:
         {
+            int counter=0;
+            scope_variable_count.push_back(counter);
             firstBlock=false;
             vector <Node> kids=rootP.getChild();
             for(const Node &node : kids)
             {
                 codeGeneration(node,output);
             }
-            pop(varCounter);
-            varCounter=0;
+            pop();
         }
         //<M> -> <F> % <M> | <F> * <M> | <F>
         case  M_Node:

@@ -63,12 +63,14 @@ int main ( int argc, char *argv[] )
     //printResults();
     codeGeneration(*p, target);
     target<<"STOP 0"<<endl;
-    for(string variable: varaibles)
+    for(string variable: GLOBALS)
     {
         target<<variable<<" 0"<<endl;
     }
-
-
+    for(string var: Local_Variables_to_be_stored)
+    {
+        target<<var<<" 0"<<endl;
+    }
 
     return 0;
 }

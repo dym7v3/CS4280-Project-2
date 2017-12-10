@@ -1,3 +1,12 @@
+Var x .
 Begin
-  Output 2 + 3 - 7 % 3 * ( [ 2 - 3 ] ) ;
+  Var y,x .
+  Input x ;
+  Input y;
+  Begin
+    Var z .
+    Output z ;
+  End
+  Output y ;
+  Output x ;
 End
