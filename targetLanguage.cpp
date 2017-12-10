@@ -25,13 +25,77 @@ using namespace std;
 //<loop>     ->      Loop [ <expr> <RO> <expr> ] <stat>
 //<assign>   ->      Identifier : <expr>   ; (Done)
 //<RO>       ->      < | <= | >  | >= | ==  |  !=
-int VarCounter=0;
 vector<string> varaibles;
-
-Node Child3;
-Node Child4;
+deque<string> variables;
+int varCounter=0;
+int globals=0;
+int VarCounter=0;
+bool firstBlock=true;
 bool expr_exists=false;
 bool m_node_exists=false;
+
+void printResults()
+{
+    cout<<"The variables: ";
+    deque<string>::iterator it;
+    for(it=variables.begin(); it!=variables.end(); it++)
+    {
+        cout<<*it<<", ";
+    }
+    cout<<"\nThe amount of the Globals is: "<<globals<<endl;
+    cout<<"The amount of Locals: "<<varCounter<<endl;
+}
+
+void push(const string value)
+{
+    variables.push_back(value);
+}
+
+void pop(int count)
+{
+    for(int i=count; 0<i; i--)
+    {
+        variables.pop_back();
+    }
+}
+int find(const string value)
+{
+    if(variables.empty())
+    {
+        return false;
+    }
+    deque<string>::iterator it;
+    it=variables.begin();
+    for(int i=globals; i>0; i--)
+    {
+        it++;
+    }
+
+    for(; it!=variables.end(); it++)
+    {
+        if(*it==value)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+bool verify(const string value)
+{
+    if(variables.empty())
+    {
+        return false;
+    }
+    deque<string>::iterator it;
+    for(it=variables.begin(); it!=variables.end(); it++)
+    {
+        if(*it==value)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 void error()
 {
@@ -46,12 +110,60 @@ string makeTempVariable()
     varaibles.push_back(variable);
     return variable;
 }
+void error(Node node)
+{
+    cout<<"SYNTAX ERROR: The variable "<<node.getTokenString()<<" already exists in the vector on line number: "<<node.getTokenLineNumber()<<endl;
+    cout<<"You can't declare the a variable with the same name twice. The compiler will terminate."<<endl;
+    exit(1);
+}
+
 
 void codeGeneration(Node rootP, ostream &output )
 {
     switch (rootP.getNODE_ID())
     {
+        //<vars> ->  empty | Var Identifier <mvars>
+        case VARS_Node:
+        {
+            if (!find(rootP.getTokenString()) && !firstBlock) {
+                push(rootP.getTokenString());
+                varCounter++;
+            } else if (!verify(rootP.getTokenString()) && firstBlock) {
+                push(rootP.getTokenString());
+                globals++;
+            } else {
+                error(rootP);
+            }
+        }
+        break;
 
+        //<mvars> -> .  | , Identifier <mvars>
+        case MVARS_Node:
+        {
+            if (!find(rootP.getTokenString()) && !firstBlock) {
+                push(rootP.getTokenString());
+                varCounter++;
+            } else if (!verify(rootP.getTokenString()) && firstBlock) {
+                push(rootP.getTokenString());
+                globals++;
+            } else {
+                error(rootP);
+            }
+        }
+        break;
+
+        //<block> ->  Begin <vars> <stats> End
+        case BLOCK_Node:
+        {
+            firstBlock=false;
+            vector <Node> kids=rootP.getChild();
+            for(const Node &node : kids)
+            {
+                codeGeneration(node,output);
+            }
+            pop(varCounter);
+            varCounter=0;
+        }
         //<M> -> <F> % <M> | <F> * <M> | <F>
         case  M_Node:
         {
@@ -96,7 +208,7 @@ void codeGeneration(Node rootP, ostream &output )
         case OUT_Node:
         {
             vector<Node> kids = rootP.getChild();
-            for (const Node node : kids)
+            for (const Node &node : kids)
             {
                 codeGeneration(node, output);
             }
@@ -108,7 +220,22 @@ void codeGeneration(Node rootP, ostream &output )
 
         case IN_Node:
         {
-            output<<"READ "<<rootP.getTokenString()<<endl;
+            if(rootP.getTokenID()==Identifiers && rootP.getNODE_ID()!=VARS_Node && rootP.getNODE_ID()!=MVARS_Node)
+            {
+                if(!find(rootP.getTokenString()))
+                {
+                    if (!verify(rootP.getTokenString()))
+                    {
+                        cout << "SYNTAX ERROR: The variable '" << rootP.getTokenString()
+                             << "' is not declared in scope on line number: " << rootP.getTokenLineNumber() << endl;
+                        cout << "The compiler will terminate." << endl;
+                        exit(1);
+                    }
+                }
+                output<<"READ "<<rootP.getTokenString()<<endl;
+            } else
+                error();
+
         }
         break;
 
@@ -154,6 +281,19 @@ void codeGeneration(Node rootP, ostream &output )
         break;
         case ASSIGN_Node:
         {
+            if(rootP.getTokenID()==Identifiers && rootP.getNODE_ID()!=VARS_Node && rootP.getNODE_ID()!=MVARS_Node)
+            {
+                if(!find(rootP.getTokenString()))
+                {
+                    if (!verify(rootP.getTokenString()))
+                    {
+                        cout << "SYNTAX ERROR: The variable '" << rootP.getTokenString()
+                             << "' is not declared in scope on line number: " << rootP.getTokenLineNumber() << endl;
+                        cout << "The compiler will terminate." << endl;
+                        exit(1);
+                    }
+                }
+            }
             vector<Node> kids = rootP.getChild();
             for (Node node : kids)
             {
@@ -169,6 +309,20 @@ void codeGeneration(Node rootP, ostream &output )
         {
             if(rootP.getTokenID()==Identifiers || rootP.getTokenID()==Integer)
             {
+                if(rootP.getTokenID()==Identifiers && rootP.getNODE_ID()!=VARS_Node && rootP.getNODE_ID()!=MVARS_Node)
+                {
+                    if(!find(rootP.getTokenString()))
+                    {
+                        if (!verify(rootP.getTokenString()))
+                        {
+                            cout << "SYNTAX ERROR: The variable '" << rootP.getTokenString()
+                                 << "' is not declared in scope on line number: " << rootP.getTokenLineNumber() << endl;
+                            cout << "The compiler will terminate." << endl;
+                            exit(1);
+                        }
+                    }
+                }
+
                 output<<"LOAD "<<rootP.getTokenString()<<endl;
             }
             else

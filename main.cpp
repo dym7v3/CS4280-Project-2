@@ -60,7 +60,6 @@ int main ( int argc, char *argv[] )
 
     Node *p=parser();
     printParseTree(*p, 0, preorder);
-    SyntaxLocal(*p, 0);
     //printResults();
     codeGeneration(*p, target);
     target<<"STOP 0"<<endl;
